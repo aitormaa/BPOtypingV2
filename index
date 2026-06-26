@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BM Typing Test</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--accent:#f4a623;--bad:#e74c3c;--green:#27ae60;--sub:#9e9ea0;--bg:#f0f1f3;--bg2:#fff;--bg3:#e4e5e7;--text:#2c2e31;--r:8px;--sh:0 2px 12px rgba(0,0,0,.08)}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.hi{position:fixed;top:-200px;left:-200px;width:1px;height:1px;opacity:0;pointer-events:none}
+.view{display:none;min-height:100vh;padding:20px 16px;flex-direction:column;align-items:center}
+.view.active{display:flex}
+.card{background:var(--bg2);border-radius:var(--r);box-shadow:var(--sh);padding:24px 28px;width:100%;max-width:520px}
+input[type=text],input[type=email],select,textarea{width:100%;border:2px solid var(--bg3);border-radius:6px;padding:10px 14px;font-size:.95rem;color:var(--text);background:var(--bg2);outline:none;transition:border .2s}
+input[type=text]:focus,input[type=email]:focus,select:focus,textarea:focus{border-color:var(--accent)}
+textarea{resize:vertical;font-family:'Courier New',monospace}
+button{cursor:pointer;border:none;border-radius:6px;padding:9px 18px;font-size:.9rem;font-weight:600;transition:opacity .15s,transform .1s}
+button:active{transform:scale(.97)}
+button:disabled{opacity:.38;cursor:not-allowed;transform:none!important}
+.ba{background:var(--accent);color:#fff}.ba:not(:disabled):hover{opacity:.88}
+.bo{background:transparent;border:2px solid var(--bg3);color:var(--text)}.bo:not(:disabled):hover{border-color:var(--sub)}
+.bd{background:var(--bad);color:#fff}
+.bs{padding:6px 13px;font-size:.83rem}
+.topbar{width:100%;max-width:900px;display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.topbar h1{font-size:1.35rem;flex:1}
+#tc{position:fixed;top:14px;right:14px;z-index:9999;display:flex;flex-direction:column;gap:7px;pointer-events:none}
+.toast{background:#2c2e31;color:#fff;padding:11px 16px;border-radius:8px;font-size:.88rem;animation:tIn .3s ease;box-shadow:0 4px 16px rgba(0,0,0,.25);max-width:300px}
+@keyframes tIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
+#v-welcome .card{margin-top:48px;text-align:center}
+.field{margin-bottom:11px;text-align:left}
+.field label{display:block;font-size:.77rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.lf-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.lf-tab{background:var(--bg2);border:2px solid var(--bg3);border-radius:20px;padding:6px 14px;font-size:.84rem;font-weight:600;cursor:pointer;transition:all .15s;color:var(--sub)}
+.lf-tab:hover{border-color:var(--sub);color:var(--text)}
+.lf-tab.on{border-color:var(--accent);background:var(--accent);color:#fff}
+.lf-tab.on.beg{border-color:#27ae60;background:#27ae60}
+.lf-tab.on.int{border-color:#2980b9;background:#2980b9}
+.tc-card{background:var(--bg2);border:2px solid var(--bg3);border-radius:var(--r);padding:16px 18px;margin-bottom:10px;cursor:pointer;transition:border-color .2s,box-shadow .2s;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.tc-card:hover{border-color:var(--accent);box-shadow:var(--sh)}
+.tc-card.feat{border-color:var(--accent);background:linear-gradient(135deg,#fffbf0,#fff)}
+.fb{background:var(--accent);color:#fff;font-size:.7rem;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px;vertical-align:middle}
+.lvl{display:inline-block;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:20px;vertical-align:middle}
+.lvl-beginner{background:#edfaf3;color:#27ae60}
+.lvl-intermediate{background:#eaf4fb;color:#2980b9}
+.gscale{margin-top:18px;background:var(--bg);border-radius:8px;padding:14px 16px;text-align:left}
+.gscale h4{font-size:.75rem;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
+.gs-tabs{display:flex;gap:3px;margin-bottom:10px}
+.gs-tab{flex:1;padding:5px;text-align:center;border-radius:5px;font-size:.77rem;font-weight:700;cursor:pointer;border:none;background:var(--bg3);color:var(--sub);transition:all .15s}
+.gs-tab.on.b{background:#27ae60;color:#fff}.gs-tab.on.i{background:#2980b9;color:#fff}
+.gs-row{display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--bg3)}
+.gs-row:last-child{border-bottom:none}
+.gs-gr{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:900;border:2px solid;flex-shrink:0}
+#v-test{padding:12px 16px}
+#th{width:100%;max-width:820px;display:flex;align-items:center;gap:14px;margin-bottom:14px}
+#th div{font-size:1.05rem;font-weight:700;flex:1}
+#rh{width:100%;max-width:820px;background:var(--bg2);border-radius:var(--r);padding:12px 16px;margin-bottom:12px;border:2px solid var(--bg3);display:none}
+#rh h4{font-size:.82rem;color:var(--sub);margin-bottom:8px}
+.rpr{display:flex;align-items:center;gap:9px;margin-bottom:6px;font-size:.86rem}
+.rpr-n{width:105px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.rb-w{flex:1;height:9px;background:var(--bg3);border-radius:5px;overflow:hidden}
+.rb{height:100%;background:var(--accent);transition:width .4s;border-radius:5px}
+.rpr-w{width:52px;text-align:right;color:var(--sub);font-size:.78rem}
+#ww{width:100%;max-width:820px;height:152px;overflow:hidden;background:var(--bg2);border-radius:var(--r);padding:14px 18px;box-shadow:var(--sh);cursor:text}
+#wi{will-change:transform;transition:transform .12s ease}
+.word{display:inline-flex;margin:0 5px 7px 0}
+.ch{font-size:1.32rem;line-height:1.7;font-family:'Courier New',monospace;position:relative;border-radius:3px}
+.ch.cur{background:var(--accent);color:#fff!important;border-radius:3px;padding:0 1px}
+.ch.ok{color:var(--green)}.ch.wbd{color:var(--bad)}
+#ts{width:100%;max-width:820px;display:flex;gap:22px;margin-top:12px;font-size:.95rem;color:var(--sub)}
+#ts span{display:flex;flex-direction:column;align-items:center}
+#ts strong{font-size:1.35rem;color:var(--text);font-family:monospace}
+#tp{width:100%;max-width:820px;height:4px;background:var(--bg3);border-radius:2px;margin-top:8px}
+#tpb{height:4px;background:var(--accent);border-radius:2px;transition:width .3s}
+.gc{width:96px;height:96px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2.7rem;font-weight:900;margin:0 auto 10px;border:4px solid}
+.gA{color:#27ae60;border-color:#27ae60;background:#edfaf3}
+.gB{color:#2980b9;border-color:#2980b9;background:#eaf4fb}
+.gC{color:#8e44ad;border-color:#8e44ad;background:#f5eef8}
+.gD{color:#e67e22;border-color:#e67e22;background:#fef9ec}
+.gF{color:#e74c3c;border-color:#e74c3c;background:#fdf0ef}
+.rs{display:flex;gap:18px;justify-content:center;margin:12px 0 14px;flex-wrap:wrap}
+.rs div{display:flex;flex-direction:column;align-items:center}
+.rs strong{font-size:1.45rem;font-family:monospace}.rs span{font-size:.72rem;color:var(--sub);text-transform:uppercase;letter-spacing:.05em}
+.rs .score-stat strong{color:var(--accent)}
+.save-status{text-align:center;font-size:.84rem;padding:8px 0 14px;transition:color .3s}
+.ph{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.pa{width:56px;height:56px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;color:#fff}
+.ps{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.ps div{background:var(--bg);border-radius:6px;padding:10px 14px;text-align:center;min-width:75px}
+.ps strong{display:block;font-size:1.35rem;font-family:monospace}.ps span{font-size:.73rem;color:var(--sub)}
+.bg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(60px,1fr));gap:9px;margin-top:8px}
+.bi{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 3px;border-radius:6px;background:var(--bg);text-align:center}
+.bi .ic{font-size:1.5rem}.bi .nm{font-size:.66rem;color:var(--sub);line-height:1.2}
+.bi.lk{opacity:.28;filter:grayscale(1)}
+.cw{background:var(--bg);border-radius:6px;padding:11px;margin:10px 0}
+.cw h4{font-size:.8rem;color:var(--sub);margin-bottom:7px}
+.lb-tabs{display:flex;margin-bottom:14px;border-radius:6px;overflow:hidden;border:2px solid var(--bg3)}
+.lbt{flex:1;padding:8px;text-align:center;cursor:pointer;font-size:.88rem;font-weight:600;background:var(--bg2);border:none;transition:background .15s}
+.lbt.active{background:var(--accent);color:#fff}
+.lbr{display:flex;align-items:center;gap:11px;padding:11px 15px;border-bottom:1px solid var(--bg3);font-size:.9rem}
+.lbr:last-child{border-bottom:none}
+.lbrk{width:26px;font-weight:700;color:var(--sub);font-family:monospace}
+.lbrk.g{color:#f4a623}.lbrk.s{color:#95a5a6}.lbrk.b{color:#cd7f32}
+.adm-tabs{display:flex;gap:3px;margin-bottom:0;flex-wrap:wrap}
+.adm-t{background:var(--bg3);border:none;border-radius:6px 6px 0 0;padding:7px 14px;cursor:pointer;font-weight:600;font-size:.85rem;transition:background .15s}
+.adm-t.active{background:var(--accent);color:#fff}
+.adm-p{background:var(--bg2);border-radius:0 var(--r) var(--r) var(--r);padding:18px;max-width:960px;width:100%;box-shadow:var(--sh)}
+.at{width:100%;border-collapse:collapse;font-size:.86rem}
+.at th{background:var(--bg);padding:7px 11px;text-align:left;font-size:.77rem;color:var(--sub);text-transform:uppercase;letter-spacing:.04em}
+.at td{padding:7px 11px;border-bottom:1px solid var(--bg3);vertical-align:middle}
+.at tr:last-child td{border-bottom:none}
+.af{display:flex;flex-direction:column;gap:9px;margin-bottom:18px;max-width:460px}
+.af label{font-size:.83rem;font-weight:600;margin-bottom:1px}
+.tag{display:inline-block;border-radius:20px;padding:2px 8px;font-size:.73rem;font-weight:700}
+.tg{background:#edfaf3;color:var(--green)}.tgr{background:var(--bg3);color:var(--sub)}.to{background:#fff8ec;color:var(--accent)}
+.tab{background:#fff3cd;color:#856404}
+.df-btn{padding:5px 11px;font-size:.8rem;font-weight:600;border-radius:20px;border:2px solid var(--bg3);background:var(--bg2);cursor:pointer;color:var(--sub);transition:all .15s}
+.df-btn.on{border-color:var(--accent);background:var(--accent);color:#fff}
+.pb-bar{margin-top:6px;padding:5px 8px;background:var(--bg);border-radius:5px;font-size:.75rem;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+#rl-card{text-align:center}
+.lc{font-size:2.8rem;font-family:monospace;font-weight:900;letter-spacing:.15em;color:var(--accent);margin:10px 0}
+.lpl div{background:var(--bg);border-radius:6px;padding:9px 13px;font-weight:600;margin-bottom:6px}
+#pod{display:flex;justify-content:center;align-items:flex-end;gap:10px;margin:18px 0}
+.pc{display:flex;flex-direction:column;align-items:center;gap:5px}
+.pb-p{border-radius:6px 6px 0 0;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:900;color:#fff;width:76px}
+.p1{height:86px;background:var(--accent)}.p2{height:62px;background:#95a5a6}.p3{height:44px;background:#cd7f32}
+.pn{font-size:.8rem;font-weight:700;text-align:center;max-width:76px}.pw{font-size:.73rem;color:var(--sub)}
+.em-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px}
+.em-box{background:#fff;border-radius:var(--r);padding:24px;width:100%;max-width:580px;max-height:90vh;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.25)}
+@media(max-width:600px){.card{padding:18px 14px}#ww{height:152px}.rs{gap:12px}}
+</style>
+</head>
+<body>
+<input class="hi" id="hi" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+<div id="tc"></div>
+<div id="v-welcome" class="view active">
+  <div class="card">
+    <div style="text-align:center;margin-bottom:22px">
+      <div style="font-size:2.2rem;margin-bottom:4px">⌨️</div>
+      <h1 style="font-size:1.7rem;margin-bottom:5px">BM Typing Test</h1>
+      <p style="color:var(--sub)">Sign in to track your progress</p>
+    </div>
+    <div class="field"><label>Full name <span style="color:var(--sub);font-weight:400;font-size:.72rem">(optional on return)</span></label><input type="text" id="ni" placeholder="e.g. Laura Smith" maxlength="40"></div>
+    <div class="field"><label>Back Market email</label><input type="email" id="ei" placeholder="name.surname@backmarket.com" maxlength="80" onkeydown="if(event.key==='Enter')doWelcome()"></div>
+    <div class="field" id="teamField" style="display:none"><label>Team</label><select id="teamSel"><option value="">— Select your team —</option></select></div>
+    <button class="ba" style="width:100%;padding:12px;margin-top:4px" onclick="doWelcome()">Let's Go →</button>
+    <div class="gscale">
+      <h4>Grading — Score = WPM × Accuracy</h4>
+      <div class="gs-tabs">
+        <button class="gs-tab on b" onclick="showGsTab('beginner',this)">🌱 Beginner</button>
+        <button class="gs-tab i" onclick="showGsTab('intermediate',this)">📘 Intermediate</button>
+      </div>
+      <div id="gs-body"></div>
+    </div>
+  </div>
+</div>
+<div id="v-library" class="view">
+  <div class="topbar" style="max-width:720px">
+    <h1>📚 Tests</h1>
+    <button class="bo bs" onclick="showView('profile')">👤 Profile</button>
+    <button class="bo bs" onclick="loadLB();showView('leaderboard')">🏆 Board</button>
+    <button class="ba bs" onclick="showJoinRace()">🏎️ Race</button>
+  </div>
+  <div style="width:100%;max-width:720px">
+    <div class="lf-tabs" id="lvl-tabs">
+      <button class="lf-tab on" onclick="filterLevel('all',this)">All levels</button>
+      <button class="lf-tab beg" onclick="filterLevel('beginner',this)">🌱 Beginner</button>
+      <button class="lf-tab int" onclick="filterLevel('intermediate',this)">📘 Intermediate</button>
+    </div>
+    <div class="lf-tabs" id="lang-tabs" style="display:none;margin-top:-6px;margin-bottom:8px"></div>
+    <div id="fw" style="margin-bottom:4px"></div>
+    <div id="tl"></div>
+  </div>
+</div>
+<div id="v-test" class="view" style="align-items:center;padding:14px 16px">
+  <div id="th"><div id="tt">Test</div><button class="bo bs" onclick="endTest()">✕ Exit</button></div>
+  <div id="rh"><h4>🏎️ LIVE RACE</h4><div id="rhp"></div></div>
+  <div id="ww" onclick="fhi()"><div id="wi"></div></div>
+  <div id="tp"><div id="tpb" style="width:0"></div></div>
+  <div id="ts">
+    <span><strong id="sw">0</strong>wpm</span>
+    <span><strong id="sa">100</strong>%</span>
+    <span><strong id="st">0</strong>sec</span>
+    <span><strong id="se">0</strong>err</span>
+  </div>
+</div>
+<div id="v-results" class="view">
+  <div class="card" style="margin-top:28px;text-align:center;max-width:420px">
+    <div id="rgc" class="gc gA">A</div>
+    <div id="rlvlb" style="margin-bottom:6px"></div>
+    <h2 id="rgl" style="margin-bottom:5px">Excellent!</h2>
+    <div id="rscore" style="font-size:.84rem;color:var(--sub);margin-bottom:8px"></div>
+    <div class="rs">
+      <div><strong id="rw">0</strong><span>WPM</span></div>
+      <div><strong id="ra">0</strong><span>Accuracy</span></div>
+      <div class="score-stat"><strong id="rsc">0</strong><span>Score</span></div>
+      <div><strong id="rt">0</strong><span>Seconds</span></div>
+      <div><strong id="re">0</strong><span>Errors</span></div>
+    </div>
+    <div id="rbe" style="margin-bottom:4px"></div>
+    <div class="save-status" id="saveStatus">💾 Saving...</div>
+    <div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap">
+      <button class="ba" onclick="retryTest()">↺ Retry</button>
+      <button class="bo" onclick="showView('library');renderLib()">← Library</button>
+    </div>
+  </div>
+</div>
+<div id="v-profile" class="view">
+  <div class="topbar" style="max-width:580px"><h1>👤 Profile</h1><button class="bo bs" onclick="showView('library')">← Back</button></div>
+  <div class="card" style="max-width:580px">
+    <div class="ph"><div class="pa" id="pav">?</div><div><h2 id="pn">-</h2><div id="pt" style="font-size:.83rem;color:var(--sub)"></div></div></div>
+    <div class="ps">
+      <div><strong id="pst">0</strong><span>Tests</span></div>
+      <div><strong id="psb">0</strong><span>Best WPM</span></div>
+      <div><strong id="psa">0</strong><span>Avg WPM</span></div>
+      <div><strong id="pss">0</strong><span>🔥 Streak</span></div>
+    </div>
+    <div class="cw"><h4>WPM Progress (last 15)</h4><div id="wc"></div></div>
+    <div><h3 style="font-size:.92rem;margin-bottom:10px">🏅 Badges</h3><div class="bg-grid" id="bgrid"></div></div>
+  </div>
+</div>
+<div id="v-leaderboard" class="view">
+  <div class="topbar" style="max-width:680px">
+    <h1>🏆 Leaderboard</h1>
+    <select id="lbf" onchange="loadLB()" style="width:auto;max-width:210px"></select>
+    <button class="bo bs" onclick="showView('library')">← Back</button>
+  </div>
+  <div style="width:100%;max-width:680px">
+    <div class="lb-tabs"><button class="lbt active" id="lti" onclick="swLbTab('i')">Individual</button><button class="lbt" id="ltt" onclick="swLbTab('t')">Teams</button></div>
+    <div class="card" style="padding:0;overflow:hidden"><div id="lbl"></div></div>
+  </div>
+</div>
+<div id="v-race" class="view">
+  <div class="topbar" style="max-width:720px"><h1 id="rvt">🏎️ Race</h1><button class="bo bs" onclick="leaveRace()">✕ Leave</button></div>
+  <div id="rl" style="width:100%;max-width:500px">
+    <div class="card" id="rl-card">
+      <h2 style="text-align:center;margin-bottom:4px">Waiting for race to start...</h2>
+      <div class="lc" id="lcd">------</div>
+      <p style="color:var(--sub);text-align:center;margin-bottom:14px">Share this code</p>
+      <div id="lplayers" style="max-width:300px;margin:0 auto 18px"></div>
+      <p style="color:var(--sub);font-size:.8rem;text-align:center">Admin will start shortly...</p>
+    </div>
+  </div>
+  <div id="rpod" style="display:none;width:100%;max-width:500px">
+    <div class="card" style="text-align:center">
+      <h2 style="margin-bottom:14px">🏁 Race Finished!</h2>
+      <div id="pod"></div><div id="ryr" style="margin:14px 0;font-size:1.05rem"></div>
+      <button class="ba" onclick="showView('library');renderLib()">← Library</button>
+    </div>
+  </div>
+</div>
+<div id="v-admin" class="view" style="align-items:flex-start;padding:14px">
+  <div style="width:100%;max-width:960px">
+    <div style="display:flex;align-items:center;gap:11px;margin-bottom:14px">
+      <h1 style="font-size:1.35rem">⚙️ Admin Panel</h1>
+      <button class="bo bs" onclick="showView('library');renderLib()">← Library</button>
+    </div>
+    <div class="adm-tabs">
+      <button class="adm-t active" onclick="aTab('tests')">Tests</button>
+      <button class="adm-t" onclick="aTab('results')">Results</button>
+      <button class="adm-t" onclick="aTab('learners')">Learners</button>
+      <button class="adm-t" onclick="aTab('leaderboard')">Leaderboard</button>
+      <button class="adm-t" onclick="aTab('races')">Races</button>
+      <button class="adm-t" onclick="aTab('teams')">Teams</button>
+    </div>
+    <div class="adm-p" id="apc"></div>
+  </div>
+</div>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({apiKey:"AIzaSyDzIJ5yjEK1udHhEBlobzfd5-nWlZI7jvo",authDomain:"bm-typing-test.firebaseapp.com",projectId:"bm-typing-test",storageBucket:"bm-typing-test.firebasestorage.app",messagingSenderId:"480868721716",appId:"1:480868721716:web:24c7fed298b4fee4f1d661"});
+const db=firebase.firestore();
+const $=id=>document.getElementById(id);
+const FV=firebase.firestore.FieldValue;
+
+// ── STATE ──
+const S={user:null,test:null,lastR:null,words:[],wEls:[],wI:0,cI:0,typed:0,errs:0,cc:0,startT:null,tmr:null,tLeft:0,raceId:null,rUnsub:null,rpUnsub:null,rWU:0,lbMode:'i',featId:null,rStarted:false,allTests:[],lvlFilter:'all',langFilter:'all',myBests:{}};
+const LEVELS={beginner:{label:'Beginner',emoji:'🌱',cls:'beginner',thresholds:{A:50,B:42,C:35,D:28},desc:'Full sentences. Build consistent speed and accuracy.'},intermediate:{label:'Intermediate',emoji:'📘',cls:'intermediate',thresholds:{A:58,B:49,C:42,D:36},desc:'Complex text and industry vocabulary. Higher standard.'}};
+const GL={A:"Excellent! 🎉",B:"Good Job! 👍",C:"Keep Going! 💪",D:"Practice More!",F:"Needs Improvement"};
+const DUR_OPTS=[[30,'30 seconds'],[45,'45 seconds'],[60,'60 seconds'],[90,'90 seconds'],[120,'2 minutes'],[180,'3 minutes']];
+function durSelect(id,val){return`<select id="${id}">${DUR_OPTS.map(([v,l])=>`<option value="${v}" ${v===(val||60)?'selected':''}>${l}</option>`).join('')}</select>`}
+function gradeOf(wpm,acc,level){const score=Math.round(wpm*(acc/100)*10)/10;const t=(LEVELS[level]||LEVELS.beginner).thresholds;return{grade:score>=t.A?'A':score>=t.B?'B':score>=t.C?'C':score>=t.D?'D':'F',score};}
+function showGsTab(lv,btn){document.querySelectorAll('.gs-tab').forEach(b=>{b.classList.remove('on','b','i')});btn.classList.add('on',lv==='beginner'?'b':'i');const L=LEVELS[lv];const t=L.thresholds;$('gs-body').innerHTML=`<p style="font-size:.75rem;color:var(--sub);margin-bottom:8px">${L.desc}</p>`+[['A',`≥${t.A}`],['B',`≥${t.B}`],['C',`≥${t.C}`],['D',`≥${t.D}`],['F',`< ${t.D}`]].map(([g,m])=>`<div class="gs-row"><div class="gs-gr g${g}">${g}</div><div style="flex:1"><strong>${m}</strong></div></div>`).join('');}
+const BADGES=[["first","First Steps","🎯","Complete first test"],["w50","Speed Demon","💨","Score 50+"],["w70","Rocket","🚀","Score 70+"],["w80","Lightning","⚡","Score 80+"],["acc100","Perfect","💎","100% accuracy"],["att10","Dedicated","🔟","10 attempts"],["att25","Grinder","🏋️","25 attempts"],["sk3","On Fire","🔥","3-day streak"],["sk7","Week Warrior","🌟","7-day streak"],["agrade","Elite","🏆","Achieve grade A"],["top1","Champion","👑","#1 on leaderboard"],["racer","Speed Racer","🏎️","Finish a race"]];
+function gmK(){return'tt_gm_'+(S.user?S.user.id:'x')}
+function gmG(){try{return JSON.parse(localStorage.getItem(gmK()))||{badges:[],streak:0,lastDay:'',wpmHistory:[]}}catch(e){return{badges:[],streak:0,lastDay:'',wpmHistory:[]}}}
+function gmS(d){localStorage.setItem(gmK(),JSON.stringify(d))}
+function gmStreak(d){const today=new Date().toISOString().slice(0,10);if(d.lastDay===today)return;const yd=new Date(Date.now()-864e5).toISOString().slice(0,10);d.streak=d.lastDay===yd?(d.streak||0)+1:1;d.lastDay=today}
+function gmCheck(score,acc,gm,att){const nb=[];function u(id){if(!gm.badges.includes(id)){gm.badges.push(id);nb.push(id)}}u('first');if(score>=50)u('w50');if(score>=70)u('w70');if(score>=80)u('w80');if(acc>=100)u('acc100');if(att>=10)u('att10');if(att>=25)u('att25');if(gm.streak>=3)u('sk3');if(gm.streak>=7)u('sk7');return nb}
+function ga(r){return r.acc!=null?r.acc:r.accuracy!=null?r.accuracy:0}
+let aCtx=null;
+function playClick(ok){try{if(!aCtx)aCtx=new(window.AudioContext||window.webkitAudioContext)();if(aCtx.state==='suspended')aCtx.resume();const now=aCtx.currentTime;if(!ok){const osc=aCtx.createOscillator(),g=aCtx.createGain();osc.type='sine';osc.frequency.value=180;g.gain.setValueAtTime(0.18,now);g.gain.exponentialRampToValueAtTime(0.001,now+0.09);osc.connect(g);g.connect(aCtx.destination);osc.start(now);osc.stop(now+0.09);}else{const len=Math.floor(aCtx.sampleRate*0.018);const buf=aCtx.createBuffer(1,len,aCtx.sampleRate);const d=buf.getChannelData(0);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.exp(-i*12/len);const src=aCtx.createBufferSource();src.buffer=buf;const hp=aCtx.createBiquadFilter();hp.type='highpass';hp.frequency.value=1800;const g=aCtx.createGain();g.gain.value=0.55;src.connect(hp);hp.connect(g);g.connect(aCtx.destination);src.start(now);}}catch(e){}}
+function showView(n){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));const el=$('v-'+n);if(el)el.classList.add('active');if(n==='profile')renderProfile()}
+function toast(msg,dur=3500){const d=document.createElement('div');d.className='toast';d.textContent=msg;$('tc').appendChild(d);setTimeout(()=>d.remove(),dur)}
+function randCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';return Array.from({length:6},()=>c[Math.floor(Math.random()*c.length)]).join('')}
+function lvlInfo(lv){return LEVELS[lv]||LEVELS.beginner}
+
+// ── WELCOME ──
+async function loadTeamsForWelcome(){try{const sn=await db.collection('teams').get();if(sn.empty)return;const sel=$('teamSel');sn.docs.forEach(d=>{const o=document.createElement('option');o.value=d.id;o.textContent=d.data().name;sel.appendChild(o)});$('teamField').style.display='block';}catch(e){}}
+async function doWelcome(){
+  const name=($('ni').value||'').trim(),email=($('ei').value||'').trim().toLowerCase();
+  if(!email||!email.includes('@')){toast('Please enter a valid Back Market email.');return}
+  const teamId=$('teamSel').value||null;
+  const btn=document.querySelector('#v-welcome button.ba');btn.disabled=true;btn.textContent='Signing in...';
+  try{
+    const snap=await db.collection('learners').where('email','==',email).limit(1).get();
+    if(!snap.empty){
+      const d=snap.docs[0];const storedName=d.data().name||email.split('@')[0];
+      S.user={id:d.id,...d.data()};
+      const upd={lastSeen:FV.serverTimestamp()};
+      if(name&&name!==storedName)upd.name=name;
+      if(teamId&&teamId!==d.data().teamId)upd.teamId=teamId;
+      await db.collection('learners').doc(d.id).update(upd);
+      S.user.name=name||storedName;if(teamId)S.user.teamId=teamId;
+      toast('Welcome back, '+S.user.name+'! 👋');
+    }else{
+      const displayName=name||email.split('@')[0];
+      const data={name:displayName,email,teamId,createdAt:FV.serverTimestamp()};
+      const r=await db.collection('learners').add(data);
+      S.user={id:r.id,...data};toast('Welcome, '+displayName+'! 🎯');
+    }
+    await loadLib();syncPending();showView('library');
+  }catch(e){toast('Error: '+e.message,4000);}
+  finally{btn.disabled=false;btn.textContent='Let\'s Go →';}
+}
+
+// ── LIBRARY ──
+// UPDATED: loads personal bests in parallel with tests
+async function loadLib(){
+  $('tl').innerHTML='<p style="color:var(--sub);padding:8px 0">Loading...</p>';
+  try{
+    const bestsQ=S.user?db.collection('results').where('learnerId','==',S.user.id).where('status','==','completed').get():Promise.resolve({docs:[]});
+    const[ts,ss,bs]=await Promise.all([db.collection('tests').where('active','==',true).get(),db.collection('settings').doc('app').get(),bestsQ]);
+    S.featId=ss.exists?(ss.data().featuredTestId||null):null;
+    S.allTests=ts.docs.map(d=>({id:d.id,...d.data()}));
+    const lo={beginner:0,intermediate:1};
+    S.allTests.sort((a,b)=>{if(a.id===S.featId)return-1;if(b.id===S.featId)return 1;return(lo[a.level||'beginner']||0)-(lo[b.level||'beginner']||0)});
+    // build personal bests map
+    S.myBests={};
+    bs.docs.forEach(d=>{const r=d.data();if(!S.myBests[r.testId]||r.wpm>S.myBests[r.testId].wpm)S.myBests[r.testId]={wpm:r.wpm,grade:r.grade,score:r.score,acc:ga(r)};});
+    S.langFilter='all';
+    renderLib();buildLangTabs();
+  }catch(e){$('tl').innerHTML='<p style="color:var(--bad)">Error loading tests.</p>'}
+}
+
+function buildLangTabs(){
+  const langs=[...new Set(S.allTests.map(t=>t.language||'').filter(Boolean))].sort();
+  const el=$('lang-tabs');
+  if(!langs.length){el.style.display='none';return}
+  el.style.display='flex';
+  el.innerHTML=`<button class="lf-tab on" onclick="filterLang('all',this)">🌐 All</button>`+langs.map(l=>`<button class="lf-tab" onclick="filterLang('${l.replace(/'/g,"\\'")}',this)">${l}</button>`).join('');
+}
+
+function filterLang(lv,btn){S.langFilter=lv;document.querySelectorAll('#lang-tabs .lf-tab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderLib();}
+function filterLevel(lv,btn){S.lvlFilter=lv;document.querySelectorAll('#lvl-tabs .lf-tab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderLib();}
+
+function renderLib(){
+  const f=S.lvlFilter,lg=S.langFilter;
+  function testMatch(t){return(f==='all'||f===(t.level||'beginner'))&&(lg==='all'||(t.language||'')===(lg))}
+  const feat=S.allTests.find(t=>t.id===S.featId);
+  $('fw').innerHTML=(feat&&testMatch(feat))?tCard(feat,true):'';
+  const rest=S.allTests.filter(t=>t.id!==S.featId&&testMatch(t));
+  $('tl').innerHTML=rest.length?rest.map(t=>tCard(t,false)).join(''):'<p style="color:var(--sub);padding:8px 0">No tests for this filter.</p>';
+}
+
+// UPDATED tCard: personal best badge shown when available
+function tCard(t,feat){
+  const wc=t.text?(t.text.trim().split(/\s+/).length):0;
+  const L=lvlInfo(t.level||'beginner');
+  const langBadge=t.language?`<span style="font-size:.78rem;background:var(--bg3);padding:2px 7px;border-radius:20px">🌐 ${t.language}</span>`:'';
+  const pb=S.myBests?.[t.id];
+  const pbHtml=pb?`<div class="pb-bar">🏆 Your best: <strong style="font-family:monospace">${pb.wpm} WPM</strong> <span class="tag to">${pb.grade}</span> <span style="color:var(--sub)">${pb.acc}% acc</span></div>`:'';
+  return`<div class="tc-card${feat?' feat':''}" onclick="startTest('${t.id}')"><div style="flex:1"><div style="font-weight:700;font-size:1rem;margin-bottom:4px">${t.title||'Untitled'}${feat?'<span class="fb">⭐ FEATURED</span>':''}</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span class="lvl lvl-${L.cls}">${L.emoji} ${L.label}</span>${langBadge}<span style="font-size:.78rem;color:var(--sub)">${wc} words · ${t.duration||60}s${t.category?' · '+t.category:''}</span></div>${pbHtml}</div><div style="color:var(--sub);font-size:1.2rem;flex-shrink:0">→</div></div>`;
+}
+
+function showJoinRace(){const c=prompt('Enter race code:');if(c)joinRace(c.trim().toUpperCase())}
+async function startTest(id){const doc=await db.collection('tests').doc(id).get();if(!doc.exists){toast('Test not found.');return}S.test={id:doc.id,...doc.data()};S.raceId=null;$('rh').style.display='none';initEngine();showView('test')}
+function initEngine(){const words=S.test.text.trim().split(/\s+/);S.words=words;S.wEls=[];S.wI=0;S.cI=0;S.errs=0;S.typed=0;S.cc=0;S.startT=null;S.tLeft=S.test.duration||60;S.rWU=0;clearInterval(S.tmr);$('tt').textContent=S.test.title||'Test';$('sw').textContent='0';$('sa').textContent='100';$('st').textContent=S.tLeft;$('se').textContent='0';$('tpb').style.width='0';const wi=$('wi');wi.style.transform='translateY(0)';wi.innerHTML='';words.forEach((w)=>{const el=document.createElement('div');el.className='word';[...w].forEach(ch=>{const s=document.createElement('span');s.className='ch';s.textContent=ch;el.appendChild(s)});wi.appendChild(el);S.wEls.push(el)});hlCur();fhi();$('hi').value='';$('hi').onkeydown=handleKey}
+function fhi(){$('hi').focus({preventScroll:true})}
+function getChs(i){return S.wEls[i]?Array.from(S.wEls[i].querySelectorAll('.ch')):[]}
+function hlCur(){document.querySelectorAll('.ch.cur').forEach(e=>e.classList.remove('cur'));const chs=getChs(S.wI);const t=chs[S.cI]||chs[chs.length-1];if(t)t.classList.add('cur')}
+function autoScroll(){const el=S.wEls[S.wI];if(!el)return;const lh=S.wEls[0]?S.wEls[0].offsetHeight:40;$('wi').style.transform=`translateY(-${Math.max(0,el.offsetTop-lh)}px)`}
+function handleKey(e){
+  if(e.key==='Tab'){e.preventDefault();return}
+  const k=e.key;if(k.length!==1&&k!=='Backspace')return;
+  if(!S.startT){S.startT=Date.now();runTimer()}
+  const chs=getChs(S.wI);const word=S.words[S.wI]||'';
+  if(k==='Backspace'){
+    e.preventDefault();
+    if(S.cI>0){S.cI--;chs[S.cI].className='ch';hlCur();}
+    else if(S.wI>0){S.wEls[S.wI].classList.remove('wa');S.wI--;const pc=getChs(S.wI);S.cI=S.words[S.wI].length-1;pc[S.cI].className='ch';S.wEls[S.wI].classList.add('wa');hlCur();autoScroll();}
+    return;
+  }
+  if(k===' '){e.preventDefault();if(S.wI>=S.words.length-1){finTest();return}S.wEls[S.wI].classList.remove('wa');S.wI++;S.cI=0;S.rWU=(S.rWU||0)+1;if(S.raceId&&S.rWU>=5){updRaceP();S.rWU=0}S.wEls[S.wI].classList.add('wa');autoScroll();hlCur();updStats();return}
+  if(S.cI>=word.length)return;
+  S.typed++;const ok=(k===word[S.cI]);
+  chs[S.cI].className='ch '+(ok?'ok':'wbd');
+  if(ok)S.cc++;else S.errs++;
+  playClick(ok);S.cI++;
+  if(S.cI>=word.length&&S.wI>=S.words.length-1){setTimeout(finTest,100);return}
+  hlCur();updStats()
+}
+function runTimer(){$('st').textContent=S.tLeft;S.tmr=setInterval(()=>{S.tLeft--;$('st').textContent=S.tLeft;const el=S.startT?(Date.now()-S.startT)/6e4:0;$('sw').textContent=el>0?Math.round((S.cc/5)/el):0;if(S.tLeft<=0)finTest()},1000)}
+function updStats(){const el=S.startT?(Date.now()-S.startT)/6e4:0;const w=el>0?Math.round((S.cc/5)/el):0;const a=S.typed>0?Math.round((S.cc/S.typed)*100):100;$('sw').textContent=w;$('sa').textContent=a;$('se').textContent=S.errs;$('tpb').style.width=(S.words.length>0?Math.round((S.wI/S.words.length)*100):0)+'%'}
+async function finTest(){clearInterval(S.tmr);$('hi').onkeydown=null;const el=S.startT?(Date.now()-S.startT)/1e3:1;const wpm=el>0?Math.round((S.cc/5)/(el/60)):0;const acc=S.typed>0?Math.round((S.cc/S.typed)*100):100;const level=S.test.level||'beginner';const{grade,score}=gradeOf(wpm,acc,level);if(S.raceId){await finRaceP(wpm,el);return}S.lastR={wpm,acc,grade,score,level,time:Math.round(el),errs:S.errs,testId:S.test.id,testTitle:S.test.title};showResults(S.lastR);autoSaveResult(S.lastR);}
+function showResults(r){$('rgc').textContent=r.grade;$('rgc').className='gc g'+r.grade;const L=lvlInfo(r.level);$('rlvlb').innerHTML=`<span class="lvl lvl-${L.cls}">${L.emoji} ${L.label}</span>`;$('rgl').textContent=GL[r.grade]||'Done!';$('rscore').textContent=`Score: ${r.score} · ${L.label} level`;$('rw').textContent=r.wpm;$('ra').textContent=r.acc+'%';$('rsc').textContent=r.score;$('rt').textContent=r.time+'s';$('re').textContent=r.errs;$('rbe').innerHTML='';$('saveStatus').textContent='💾 Saving result...';$('saveStatus').style.color='var(--sub)';showView('results')}
+function pKey(){return'tt_pend_'+(S.user?.id||'x')}
+function savePending(r){const k=pKey();const list=JSON.parse(localStorage.getItem(k)||'[]');if(!list.find(p=>p.testId===r.testId&&p.time===r.time)){list.push({...r,learnerId:S.user.id,learnerName:S.user.name,failedAt:new Date().toISOString()});localStorage.setItem(k,JSON.stringify(list))}}
+function clearPending(r){const k=pKey();let list=JSON.parse(localStorage.getItem(k)||'[]');list=list.filter(p=>!(p.testId===r.testId&&p.time===r.time));localStorage.setItem(k,JSON.stringify(list))}
+async function syncPending(){if(!S.user)return;const k=pKey();const list=JSON.parse(localStorage.getItem(k)||'[]');if(!list.length)return;let n=0;const rem=[];for(const r of list){try{await db.collection('results').add({...r,createdAt:FV.serverTimestamp()});n++;}catch(e){rem.push(r)}}localStorage.setItem(k,JSON.stringify(rem));if(n>0)toast(`✅ ${n} pending result${n>1?'s':''} synced!`)}
+
+// UPDATED autoSaveResult: now saves language field + updates myBests
+async function autoSaveResult(r){
+  try{
+    await db.collection('results').add({learnerId:S.user.id,learnerName:S.user.name,testId:r.testId,testTitle:r.testTitle,wpm:r.wpm,acc:r.acc,grade:r.grade,score:r.score,level:r.level,time:r.time,errors:r.errs,language:S.test?.language||null,status:'completed',createdAt:FV.serverTimestamp()});
+    clearPending(r);
+    $('saveStatus').textContent='✓ Result saved';$('saveStatus').style.color='var(--green)';
+    // update local personal best
+    if(!S.myBests[r.testId]||r.wpm>S.myBests[r.testId].wpm)S.myBests[r.testId]={wpm:r.wpm,grade:r.grade,score:r.score,acc:r.acc};
+    await procGM(r);await chkTop1(r);
+  }catch(e){savePending(r);const ss=$('saveStatus');ss.innerHTML='⚠️ Saved locally · <a href="#" onclick="autoSaveResult(S.lastR);return false" style="color:var(--accent);font-weight:700">Retry sync</a>';ss.style.color='var(--bad)';}
+}
+
+// UPDATED endTest: saves language field
+function endTest(){
+  clearInterval(S.tmr);$('hi').onkeydown=null;
+  if(S.raceId){leaveRace();return}
+  if(S.startT&&S.user&&S.test){
+    const el=Math.max(1,(Date.now()-S.startT)/1e3);
+    const wpm=Math.max(0,Math.round((S.cc/5)/(el/60)));
+    const acc=S.typed>0?Math.round((S.cc/S.typed)*100):100;
+    const level=S.test.level||'beginner';
+    const{grade,score}=gradeOf(wpm,acc,level);
+    db.collection('results').add({learnerId:S.user.id,learnerName:S.user.name,testId:S.test.id,testTitle:S.test.title,wpm,acc,grade,score,level,time:Math.round(el),errors:S.errs,language:S.test.language||null,status:'abandoned',createdAt:FV.serverTimestamp()}).catch(()=>{});
+  }
+  showView('library');renderLib();
+}
+
+function retryTest(){if(S.test){initEngine();showView('test')}}
+async function procGM(r){const gm=gmG();gmStreak(gm);gm.wpmHistory=gm.wpmHistory||[];gm.wpmHistory.push(r.wpm);if(gm.wpmHistory.length>15)gm.wpmHistory=gm.wpmHistory.slice(-15);let att=0;try{const sn=await db.collection('results').where('learnerId','==',S.user.id).where('status','==','completed').get();att=sn.size}catch(e){}const nb=gmCheck(r.score,r.acc,gm,att);if(r.grade==='A'&&!gm.badges.includes('agrade')){gm.badges.push('agrade');nb.push('agrade')}gmS(gm);nb.forEach(id=>{const b=BADGES.find(x=>x[0]===id);if(b)setTimeout(()=>toast(`🏅 Badge: ${b[2]} ${b[1]}!`),400)});if(nb.length){$('rbe').innerHTML='<div style="color:var(--accent);font-weight:700;margin-top:4px">🏅 '+nb.map(id=>{const b=BADGES.find(x=>x[0]===id);return b?b[2]+' '+b[1]:id}).join(' · ')+'</div>'}}
+async function chkTop1(r){try{const sn=await db.collection('results').where('testId','==',r.testId).where('status','==','completed').orderBy('wpm','desc').limit(1).get();if(!sn.empty&&sn.docs[0].data().learnerId===S.user.id){setTimeout(()=>toast(`👑 You're #1 on ${r.testTitle||'this test'}!`),800);const gm=gmG();if(!gm.badges.includes('top1')){gm.badges.push('top1');gmS(gm);toast('🏅 Badge: 👑 Champion!')}}}catch(e){}}
+async function renderProfile(){if(!S.user)return;$('pn').textContent=S.user.name;$('pav').textContent=S.user.name[0].toUpperCase();$('pt').innerHTML='';if(S.user.teamId){try{const td=await db.collection('teams').doc(S.user.teamId).get();if(td.exists){const t=td.data();$('pt').innerHTML=`<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${t.color||'#999'};margin-right:4px"></span>${t.name}`+(S.user.email?` · <span style="color:var(--sub)">${S.user.email}</span>`:'')}}}catch(e){}else if(S.user.email){$('pt').innerHTML=`<span style="color:var(--sub)">${S.user.email}</span>`}const gm=gmG();$('pss').textContent=gm.streak||0;try{const sn=await db.collection('results').where('learnerId','==',S.user.id).where('status','==','completed').get();const res=sn.docs.map(d=>d.data());$('pst').textContent=res.length;const wpms=res.map(r=>r.wpm).filter(w=>w>0);$('psb').textContent=wpms.length?Math.max(...wpms):0;$('psa').textContent=wpms.length?Math.round(wpms.reduce((a,b)=>a+b,0)/wpms.length):0}catch(e){}$('wc').innerHTML=renderChart(gm.wpmHistory||[]);$('bgrid').innerHTML=BADGES.map(([id,nm,ic,desc])=>`<div class="bi ${gm.badges.includes(id)?'':'lk'}" title="${desc}"><span class="ic">${ic}</span><span class="nm">${nm}</span></div>`).join('')}
+function renderChart(hist){if(hist.length<2)return'<p style="color:var(--sub);font-size:.83rem;text-align:center">Complete more tests to see your chart</p>';const W=290,H=110,p=12,vals=hist.slice(-15),max=Math.max(...vals,1),min=Math.min(...vals,0),rng=max-min||1;const pts=vals.map((v,i)=>{const x=p+(i/(vals.length-1))*(W-2*p),y=H-p-((v-min)/rng)*(H-2*p);return`${x.toFixed(1)},${y.toFixed(1)}`}).join(' ');const dots=vals.map((v,i)=>{const x=p+(i/(vals.length-1))*(W-2*p),y=H-p-((v-min)/rng)*(H-2*p);return`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="var(--accent)"><title>${v} WPM</title></circle>`}).join('');return`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px"><polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>${dots}<text x="${p}" y="${H-2}" font-size="9" fill="var(--sub)">${vals[0]}</text><text x="${W-p}" y="${H-2}" font-size="9" fill="var(--sub)" text-anchor="end">${vals[vals.length-1]}</text><text x="${W/2}" y="10" font-size="9" fill="var(--sub)" text-anchor="middle">Best: ${max}</text></svg>`}
+
+// ── PUBLIC LEADERBOARD ──
+async function loadLB(){$('lbl').innerHTML='<p style="padding:14px;color:var(--sub)">Loading...</p>';const testId=$('lbf').value||'';try{const ts=await db.collection('tests').get();const sel=$('lbf');const ex=new Set(Array.from(sel.options).map(o=>o.value));if(!ex.has('')){const o=document.createElement('option');o.value='';o.textContent='All Tests';sel.insertBefore(o,sel.firstChild)}ts.docs.forEach(d=>{if(!ex.has(d.id)){const o=document.createElement('option');o.value=d.id;o.textContent=d.data().title||d.id;sel.appendChild(o)}})}catch(e){}if(S.lbMode==='t'){renderTeamsLB(testId);return}try{let q=db.collection('results').orderBy('wpm','desc');if(testId)q=db.collection('results').where('testId','==',testId).orderBy('wpm','desc');const sn=await q.get();const seen=new Map();sn.docs.filter(d=>d.data().status!=='abandoned').forEach(d=>{const r=d.data();const k=r.learnerId+(testId?'':r.testId);if(!seen.has(k)||seen.get(k).wpm<r.wpm)seen.set(k,r)});renderLbRows([...seen.values()].sort((a,b)=>b.wpm-a.wpm))}catch(e){$('lbl').innerHTML='<p style="padding:14px;color:var(--bad)">Error.</p>'}}
+function renderLbRows(rows){if(!rows.length){$('lbl').innerHTML='<p style="padding:14px;color:var(--sub)">No results yet — be the first!</p>';return}$('lbl').innerHTML=rows.map((r,i)=>{const rc=i===0?'g':i===1?'s':i===2?'b':'';const m=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';const L=lvlInfo(r.level||'beginner');return`<div class="lbr"><div class="lbrk ${rc}">${m||'#'+(i+1)}</div><div style="flex:1;font-weight:600">${r.learnerName||'?'}</div><div style="flex:1;font-size:.78rem;color:var(--sub)">${r.testTitle||''}</div><span class="lvl lvl-${L.cls}">${L.emoji}</span><div style="font-family:monospace;font-weight:700;font-size:1rem;margin-left:7px">${r.wpm}</div><div style="margin-left:7px;color:var(--sub);font-size:.83rem">${ga(r)}%</div></div>`}).join('')}
+async function renderTeamsLB(testId){try{let q=db.collection('results').orderBy('wpm','desc');if(testId)q=db.collection('results').where('testId','==',testId).orderBy('wpm','desc');const[rs,ls,tms]=await Promise.all([q.get(),db.collection('learners').get(),db.collection('teams').get()]);const lt={};ls.docs.forEach(d=>{const dd=d.data();if(dd.teamId)lt[d.id]=dd.teamId});const tm={};tms.docs.forEach(d=>tm[d.id]={...d.data(),id:d.id,sumWpm:0,sumAcc:0,cnt:0});const seen=new Map();rs.docs.filter(d=>d.data().status!=='abandoned').forEach(d=>{const r=d.data();if(!seen.has(r.learnerId)||seen.get(r.learnerId).wpm<r.wpm)seen.set(r.learnerId,r)});seen.forEach((r,lid)=>{const tid=lt[lid];if(tid&&tm[tid]){tm[tid].sumWpm+=r.wpm;tm[tid].sumAcc+=ga(r);tm[tid].cnt++}});const teams=Object.values(tm).filter(t=>t.cnt>0).sort((a,b)=>b.sumWpm-a.sumWpm);if(!teams.length){$('lbl').innerHTML='<p style="padding:14px;color:var(--sub)">No team results yet.</p>';return}$('lbl').innerHTML=teams.map((t,i)=>`<div class="lbr"><div class="lbrk ${i===0?'g':i===1?'s':i===2?'b':''}">#${i+1}</div><div style="flex:1;font-weight:600"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${t.color||'#999'};margin-right:5px;vertical-align:middle"></span>${t.name}</div><div style="flex:1;font-size:.78rem;color:var(--sub)">${t.cnt} members</div><div style="font-family:monospace;font-weight:700;font-size:1rem">${t.sumWpm} WPM</div><div style="margin-left:9px;color:var(--sub);font-size:.83rem">${t.cnt?Math.round(t.sumAcc/t.cnt):0}% avg</div></div>`).join('')}catch(e){$('lbl').innerHTML='<p style="padding:14px;color:var(--bad)">Error.</p>'}}
+function swLbTab(m){S.lbMode=m;$('lti').classList.toggle('active',m==='i');$('ltt').classList.toggle('active',m==='t');loadLB()}
+
+// ── RACE ──
+async function joinRace(code){try{const sn=await db.collection('races').where('code','==',code).limit(1).get();if(sn.empty){toast('Race not found.');return}const doc=sn.docs[0];const race={id:doc.id,...doc.data()};if(race.status==='done'){toast('This race already finished.');return}S.raceId=race.id;S.raceData=race;S.rStarted=false;await db.collection('races').doc(race.id).collection('players').doc(S.user.id).set({name:S.user.name,progress:0,wpm:0,done:false});$('rvt').textContent='🏎️ '+race.testTitle;$('lcd').textContent=race.code;$('rl').style.display='block';$('rpod').style.display='none';showView('race');subRace()}catch(e){toast('Error: '+e.message)}}
+function subRace(){if(S.rUnsub)S.rUnsub();S.rUnsub=db.collection('races').doc(S.raceId).onSnapshot(sn=>{if(!sn.exists)return;const d=sn.data();S.raceData=d;if(d.status==='racing'&&!S.rStarted){S.rStarted=true;startRaceEng(d)}});if(S.rpUnsub)S.rpUnsub();S.rpUnsub=db.collection('races').doc(S.raceId).collection('players').onSnapshot(sn=>{const players=sn.docs.map(d=>({id:d.id,...d.data()}));$('lplayers').innerHTML=players.map(p=>`<div class="lpl div">👤 ${p.name}</div>`).join('');updRaceHUD(players);if(players.length>0&&players.every(p=>p.done)){showPodium([...players].sort((a,b)=>(a.finishedAt||Infinity)-(b.finishedAt||Infinity)))}})}
+function startRaceEng(race){$('rl').style.display='none';S.test={id:race.testId,title:race.testTitle,text:race.text,duration:race.time||60,level:race.level||'beginner'};$('rh').style.display='block';initEngine();showView('test')}
+function updRaceHUD(players){const el=$('rhp');if(!el)return;el.innerHTML=[...players].sort((a,b)=>b.progress-a.progress).map(p=>`<div class="rpr"><div class="rpr-n">${p.name===(S.user?.name||'')?'⭐ '+p.name:p.name}</div><div class="rb-w"><div class="rb" style="width:${p.progress||0}%"></div></div><div class="rpr-w">${p.wpm||0}w</div></div>`).join('')}
+async function updRaceP(){if(!S.raceId||!S.user)return;const prog=Math.round((S.wI/S.words.length)*100);const el=S.startT?(Date.now()-S.startT)/6e4:0;try{await db.collection('races').doc(S.raceId).collection('players').doc(S.user.id).update({progress:prog,wpm:el>0?Math.round((S.cc/5)/el):0})}catch(e){}}
+async function finRaceP(wpm,elapsed){const gm=gmG();if(!gm.badges.includes('racer')){gm.badges.push('racer');gmS(gm);toast('🏅 Badge: 🏎️ Speed Racer!')}const sn=await db.collection('races').doc(S.raceId).collection('players').get();const rank=sn.docs.map(d=>d.data()).filter(p=>p.done).length+1;await db.collection('races').doc(S.raceId).collection('players').doc(S.user.id).update({done:true,wpm,rank,finishedAt:Date.now(),progress:100})}
+function showPodium(players){clearInterval(S.tmr);$('hi').onkeydown=null;$('rh').style.display='none';showView('race');$('rl').style.display='none';$('rpod').style.display='block';$('pod').innerHTML=players.slice(0,3).map((p,i)=>`<div class="pc"><div class="pn">${p.name}</div><div class="pw">${p.wpm||0}w</div><div class="pb-p ${['p1','p2','p3'][i]}">${['🥇','🥈','🥉'][i]}</div></div>`).join('');const me=players.find(p=>p.id===S.user.id||p.name===S.user.name);if(me)$('ryr').textContent=`You finished #${me.rank||'?'} with ${me.wpm} WPM!`;if(S.rUnsub){S.rUnsub();S.rUnsub=null}if(S.rpUnsub){S.rpUnsub();S.rpUnsub=null}}
+function leaveRace(){clearInterval(S.tmr);$('hi').onkeydown=null;$('rh').style.display='none';if(S.rUnsub){S.rUnsub();S.rUnsub=null}if(S.rpUnsub){S.rpUnsub();S.rpUnsub=null}S.raceId=null;S.rStarted=false;showView('library');renderLib()}
+function dlCSV(headers,rows,filename){const csv=[headers.join(','),...rows.map(r=>r.map(v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"').join(','))].join('\n');const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download=filename+'_'+new Date().toISOString().slice(0,10)+'.csv';a.click();toast('CSV downloaded ✅')}
+
+// ── ADMIN ──
+const aTabs=['tests','results','learners','leaderboard','races','teams'];
+function aTab(tab){document.querySelectorAll('.adm-t').forEach((b,i)=>b.classList.toggle('active',aTabs[i]===tab));({tests:aTests,results:aResults,learners:aLearners,leaderboard:aLB,races:aRaces,teams:aTeams})[tab]?.()}
+async function aTests(){
+  const el=$('apc');el.innerHTML='<p style="color:var(--sub)">Loading...</p>';
+  const sn=await db.collection('tests').orderBy('createdAt','desc').get();
+  const tests=sn.docs.map(d=>({id:d.id,...d.data()}));
+  el.innerHTML=`<h3 style="margin-bottom:14px">Tests</h3><div class="af"><div><label>Title</label><input type="text" id="at-t" placeholder="Test title"></div><div><label>Level</label><select id="at-l"><option value="beginner">🌱 Beginner</option><option value="intermediate">📘 Intermediate</option></select></div><div><label>Language (optional)</label><input type="text" id="at-lang" placeholder="e.g. English, Spanish, French"></div><div><label>Category (optional)</label><input type="text" id="at-c" placeholder="Category"></div><div><label>Duration</label>${durSelect('at-d',60)}</div><div><label>Text</label><textarea id="at-x" rows="4" placeholder="Paste test text here..."></textarea></div><button class="ba bs" onclick="aAddTest()">+ Add Test</button></div><table class="at"><thead><tr><th>Title</th><th>Level</th><th>Language</th><th>Words</th><th>Status</th><th>Actions</th></tr></thead><tbody>${tests.map(t=>{const wc=t.text?t.text.trim().split(/\s+/).length:0;const L=lvlInfo(t.level||'beginner');const isFeat=t.id===S.featId;const isInt=(t.level||'beginner')==='intermediate';return`<tr><td><strong>${t.title||'?'}</strong>${isFeat?' <span class="tag to">⭐</span>':''}</td><td><span class="lvl lvl-${L.cls}">${L.emoji} ${L.label}</span></td><td style="font-size:.82rem">${t.language||'<span style="color:var(--sub)">—</span>'}</td><td>${wc}</td><td><span class="tag ${t.active?'tg':'tgr'}">${t.active?'Active':'Off'}</span></td><td style="display:flex;gap:5px;flex-wrap:wrap"><button class="bs bo" onclick="aEditTest('${t.id}')">✏️ Edit</button><button class="bs bo" style="color:${isInt?'#27ae60':'#2980b9'};border-color:${isInt?'#27ae60':'#2980b9'}" onclick="aMoveLevel('${t.id}','${t.level||'beginner'}')">${isInt?'→ 🌱':'→ 📘'}</button><button class="bs bo" onclick="aToggle('${t.id}',${!t.active})">${t.active?'Off':'On'}</button><button class="bs bo" onclick="aFeat('${t.id}')">${isFeat?'Unfeature':'⭐'}</button><button class="bs bd" onclick="aDel('tests','${t.id}',aTests)">Del</button></td></tr>`}).join('')}</tbody></table>`;
+}
+async function aAddTest(){const t=($('at-t').value||'').trim(),x=($('at-x').value||'').trim(),d=parseInt($('at-d').value)||60,c=($('at-c').value||'').trim(),l=$('at-l').value||'beginner',lng=($('at-lang').value||'').trim();if(!t||!x){toast('Title and text required.');return}await db.collection('tests').add({title:t,text:x,duration:d,category:c||null,level:l,language:lng||null,active:true,createdAt:FV.serverTimestamp()});toast('Test added!');aTests()}
+async function aToggle(id,active){await db.collection('tests').doc(id).update({active});aTests()}
+async function aFeat(id){const nid=S.featId===id?null:id;await db.collection('settings').doc('app').set({featuredTestId:nid},{merge:true});S.featId=nid;aTests()}
+async function aDel(col,id,fn){if(!confirm('Delete?'))return;await db.collection(col).doc(id).delete();fn()}
+async function aEditTest(id){const doc=await db.collection('tests').doc(id).get();if(!doc.exists)return;const t=doc.data();const m=document.createElement('div');m.className='em-overlay';m.id='em';m.innerHTML=`<div class="em-box"><h3 style="margin-bottom:16px">✏️ Edit Test</h3><div class="af"><div><label>Title</label><input type="text" id="et-t" value="${(t.title||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}"></div><div><label>Level</label><select id="et-l"><option value="beginner" ${(t.level||'beginner')==='beginner'?'selected':''}>🌱 Beginner</option><option value="intermediate" ${t.level==='intermediate'?'selected':''}>📘 Intermediate</option></select></div><div><label>Language</label><input type="text" id="et-lang" value="${(t.language||'').replace(/"/g,'&quot;')}" placeholder="e.g. English, Spanish, French"></div><div><label>Category</label><input type="text" id="et-c" value="${(t.category||'').replace(/"/g,'&quot;')}"></div><div><label>Duration</label>${durSelect('et-d',t.duration||60)}</div><div><label>Text</label><textarea id="et-x" rows="7">${(t.text||'').replace(/</g,'&lt;')}</textarea></div></div><div style="display:flex;gap:9px;justify-content:flex-end;margin-top:8px"><button class="bo bs" onclick="document.getElementById('em').remove()">Cancel</button><button class="ba bs" onclick="aSaveEdit('${id}')">💾 Save Changes</button></div></div>`;document.body.appendChild(m);m.addEventListener('click',e=>{if(e.target===m)m.remove()});setTimeout(()=>$('et-t')?.focus(),50);}
+async function aSaveEdit(id){const t=($('et-t').value||'').trim(),x=($('et-x').value||'').trim(),d=parseInt($('et-d').value)||60,c=($('et-c').value||'').trim(),l=$('et-l').value||'beginner',lng=($('et-lang').value||'').trim();if(!t||!x){toast('Title and text required.');return}await db.collection('tests').doc(id).update({title:t,text:x,duration:d,category:c||null,level:l,language:lng||null});toast('Test updated ✅');document.getElementById('em')?.remove();aTests()}
+async function aMoveLevel(id,current){const nl=current==='intermediate'?'beginner':'intermediate';const L=lvlInfo(nl);await db.collection('tests').doc(id).update({level:nl});toast(`Moved to ${L.emoji} ${L.label}`);aTests()}
+
+// ── ADMIN RESULTS (with test filter + date range + language in CSV) ──
+let _resultRows=[];let _resultTeamFilter='';let _resultTestFilter='';let _resultDateFilter='all';
+async function aResults(){
+  const el=$('apc');el.innerHTML='<p style="color:var(--sub)">Loading...</p>';
+  const[rs,ls,ts]=await Promise.all([db.collection('results').orderBy('createdAt','desc').get(),db.collection('learners').get(),db.collection('teams').get()]);
+  const teams={};ts.docs.forEach(d=>teams[d.id]={id:d.id,...d.data()});
+  const learnerTeam={};ls.docs.forEach(d=>{const dd=d.data();if(dd.teamId)learnerTeam[d.id]=dd.teamId});
+  _resultRows=rs.docs.map(d=>({id:d.id,...d.data()})).map(r=>{const tid=learnerTeam[r.learnerId]||'';return{...r,_teamId:tid,_teamName:teams[tid]?.name||''};});
+  _resultTeamFilter='';_resultTestFilter='';_resultDateFilter='all';
+  // build unique test list from results
+  const testMap={};_resultRows.forEach(r=>{if(r.testId&&r.testTitle)testMap[r.testId]=r.testTitle});
+  const teamOpts='<option value="">All teams</option>'+Object.values(teams).map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
+  const testOpts='<option value="">All tests</option>'+Object.entries(testMap).map(([id,title])=>`<option value="${id}">${title}</option>`).join('');
+  const aband=_resultRows.filter(r=>r.status==='abandoned').length;
+  el.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px"><h3>Results (${_resultRows.length}${aband?' · <span class="tag tab">⚠️ '+aband+' abandoned</span>':''})</h3><button class="bs ba" onclick="exportResultsCSV()">⬇ CSV</button></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center"><select id="res-tf" onchange="applyResultFilters()" style="width:auto">${teamOpts}</select><select id="res-testf" onchange="applyResultFilters()" style="width:auto;max-width:200px">${testOpts}</select><div style="display:flex;gap:4px">${['all','30d','7d'].map(v=>`<button class="df-btn${v==='all'?' on':''}" id="rdf-${v}" onclick="setResultDateFilter('${v}')">${v==='all'?'All time':v==='30d'?'30 days':'7 days'}</button>`).join('')}</div></div><div id="res-count" style="font-size:.83rem;color:var(--sub);margin-bottom:8px"></div><div id="res-tbody"></div>`;
+  renderResultsTable();
+}
+function setResultDateFilter(v){
+  _resultDateFilter=v;
+  ['all','30d','7d'].forEach(k=>{const b=$('rdf-'+k);if(b)b.classList.toggle('on',k===v)});
+  applyResultFilters();
+}
+function applyResultFilters(){
+  _resultTeamFilter=$('res-tf')?.value||'';
+  _resultTestFilter=$('res-testf')?.value||'';
+  renderResultsTable();
+}
+function resultDateOk(r){
+  if(_resultDateFilter==='all')return true;
+  const d=r.createdAt?.toDate?.();if(!d)return true;
+  return Date.now()-d.getTime()<(_resultDateFilter==='7d'?7:30)*864e5;
+}
+function renderResultsTable(){
+  let rows=_resultRows;
+  if(_resultTeamFilter)rows=rows.filter(r=>r._teamId===_resultTeamFilter);
+  if(_resultTestFilter)rows=rows.filter(r=>r.testId===_resultTestFilter);
+  rows=rows.filter(resultDateOk);
+  const cnt=$('res-count');if(cnt)cnt.textContent=`Showing ${rows.length} result${rows.length!==1?'s':''}`;
+  if(!rows.length){$('res-tbody').innerHTML='<p style="color:var(--sub);padding:14px 0">No results match this filter.</p>';return}
+  $('res-tbody').innerHTML=`<table class="at"><thead><tr><th>Learner</th><th>Team</th><th>Test</th><th>Lang</th><th>Level</th><th>WPM</th><th>Acc</th><th>Score</th><th>Grade</th><th>Status</th><th>Date</th><th></th></tr></thead><tbody>${rows.map(r=>{const L=lvlInfo(r.level||'beginner');const isAb=r.status==='abandoned';return`<tr style="${isAb?'opacity:.75':''}"><td>${r.learnerName||'?'}</td><td style="font-size:.82rem">${r._teamName?`<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:4px;vertical-align:middle"></span>${r._teamName}`:'<span style="color:var(--sub)">—</span>'}</td><td style="color:var(--sub);font-size:.8rem">${r.testTitle||''}</td><td style="font-size:.8rem">${r.language||'<span style="color:var(--sub)">—</span>'}</td><td><span class="lvl lvl-${L.cls}">${L.emoji}</span></td><td><strong>${r.wpm}</strong></td><td>${ga(r)}%</td><td style="font-family:monospace">${r.score||'—'}</td><td><span class="tag to">${r.grade||'?'}</span></td><td>${isAb?'<span class="tag tab">⚠️ Quit</span>':'<span class="tag tg">✓ Done</span>'}</td><td style="color:var(--sub);font-size:.78rem;white-space:nowrap">${r.createdAt?.toDate?.()?.toLocaleDateString?.('en-GB')||'—'}</td><td><button class="bs bd" onclick="aDel('results','${r.id}',aResults)">Del</button></td></tr>`}).join('')}</tbody></table>`;
+}
+// UPDATED: includes Language column
+function exportResultsCSV(){
+  let rows=_resultRows;
+  if(_resultTeamFilter)rows=rows.filter(r=>r._teamId===_resultTeamFilter);
+  if(_resultTestFilter)rows=rows.filter(r=>r.testId===_resultTestFilter);
+  rows=rows.filter(resultDateOk);
+  if(!rows.length){toast('No results to export.');return}
+  dlCSV(['Learner','Team','Test','Language','Level','WPM','Accuracy(%)','Score','Grade','Status','Time(s)','Errors','Date'],rows.map(r=>[r.learnerName,r._teamName||'',r.testTitle,r.language||'',r.level||'beginner',r.wpm,ga(r),r.score||'',r.grade,r.status||'completed',r.time,r.errors,r.createdAt?.toDate?.()?.toISOString?.()??'']),'results');
+}
+
+// ── ADMIN LEARNERS (team filter + clickable detail) ──
+let _learnerRows=[];let _learnerTeamFilter='';let _learnerTeamsMap={};
+async function aLearners(){
+  const el=$('apc');el.innerHTML='<p style="color:var(--sub)">Loading...</p>';
+  const[ls,ts]=await Promise.all([db.collection('learners').get(),db.collection('teams').get()]);
+  _learnerTeamsMap={};ts.docs.forEach(d=>_learnerTeamsMap[d.id]={id:d.id,...d.data()});
+  _learnerRows=ls.docs.map(d=>({id:d.id,...d.data()})).map(l=>({...l,_teamName:l.teamId&&_learnerTeamsMap[l.teamId]?_learnerTeamsMap[l.teamId].name:'',_teamColor:l.teamId&&_learnerTeamsMap[l.teamId]?_learnerTeamsMap[l.teamId].color||'#999':'',_teamId:l.teamId||''}));
+  _learnerTeamFilter='';
+  const teamFilterOpts='<option value="">All teams</option>'+Object.values(_learnerTeamsMap).map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
+  el.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px"><h3>Learners (${_learnerRows.length})</h3><select id="lrn-tf" onchange="filterLearners(this.value)" style="width:auto">${teamFilterOpts}</select></div><div id="lrn-tbody"></div>`;
+  renderLearnersTable('');
+}
+function filterLearners(teamId){_learnerTeamFilter=teamId;renderLearnersTable(teamId);}
+function renderLearnersTable(teamId){
+  const rows=teamId?_learnerRows.filter(l=>l._teamId===teamId):_learnerRows;
+  if(!rows.length){$('lrn-tbody').innerHTML='<p style="color:var(--sub);padding:14px 0">No learners for this team.</p>';return}
+  const topts=Object.values(_learnerTeamsMap).map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
+  $('lrn-tbody').innerHTML=`<table class="at"><thead><tr><th>Name</th><th>Email</th><th>Team</th><th>Assign Team</th><th></th></tr></thead><tbody>${rows.map(l=>`<tr><td><strong style="cursor:pointer;color:var(--accent);text-decoration:underline;text-decoration-style:dotted" onclick="aLearnerDetail('${l.id}','${(l.name||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'")}'')">${l.name||'?'}</strong></td><td style="color:var(--sub);font-size:.8rem">${l.email||'—'}</td><td>${l._teamName?`<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${l._teamColor};margin-right:4px"></span>${l._teamName}`:'—'}</td><td><select onchange="aAssignTeam('${l.id}',this.value)" style="width:auto"><option value="">No team</option>${topts}</select></td><td><button class="bs bd" onclick="aDelLearner('${l.id}','${(l.name||'').replace(/'/g,"\\'")}')">🗑</button></td></tr>`).join('')}</tbody></table>`;
+}
+
+// NEW: learner detail modal
+async function aLearnerDetail(id,name){
+  const m=document.createElement('div');m.className='em-overlay';m.id='em-ld';
+  m.innerHTML=`<div class="em-box"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><h3>📋 ${name}</h3><button class="bo bs" onclick="document.getElementById('em-ld').remove()">✕ Close</button></div><p style="color:var(--sub);font-size:.85rem">Loading...</p></div>`;
+  document.body.appendChild(m);m.addEventListener('click',e=>{if(e.target===m)m.remove()});
+  try{
+    const sn=await db.collection('results').where('learnerId','==',id).orderBy('createdAt','desc').get();
+    const results=sn.docs.map(d=>({id:d.id,...d.data()}));
+    const box=m.querySelector('.em-box');
+    if(!results.length){box.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><h3>📋 ${name}</h3><button class="bo bs" onclick="document.getElementById('em-ld').remove()">✕ Close</button></div><p style="color:var(--sub)">No results yet.</p>`;return}
+    const completed=results.filter(r=>r.status!=='abandoned');
+    const wpms=completed.map(r=>r.wpm).filter(w=>w>0);
+    const accs=completed.map(r=>ga(r));
+    const avgWpm=wpms.length?Math.round(wpms.reduce((a,b)=>a+b,0)/wpms.length):0;
+    const bestWpm=wpms.length?Math.max(...wpms):0;
+    const avgAcc=accs.length?Math.round(accs.reduce((a,b)=>a+b,0)/accs.length):0;
+    const bestAcc=accs.length?Math.max(...accs):0;
+    window._ldResults={id,name,results};
+    box.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px"><h3>📋 ${name}</h3><div style="display:flex;gap:8px"><button class="ba bs" onclick="dlLearnerCSV('${id}','${name.replace(/'/g,"\\'")}')">⬇ CSV</button><button class="bo bs" onclick="document.getElementById('em-ld').remove()">✕ Close</button></div></div><div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">${[['Tests',completed.length],['Best WPM',bestWpm],['Avg WPM',avgWpm],['Avg Acc',avgAcc+'%'],['Best Acc',bestAcc+'%']].map(([l,v])=>`<div style="background:var(--bg);border-radius:6px;padding:8px 14px;text-align:center"><strong style="display:block;font-size:1.15rem;font-family:monospace">${v}</strong><span style="font-size:.72rem;color:var(--sub)">${l}</span></div>`).join('')}</div><table class="at"><thead><tr><th>Test</th><th>Lang</th><th>WPM</th><th>Acc</th><th>Score</th><th>Grade</th><th>Status</th><th>Date</th></tr></thead><tbody>${results.map(r=>{const isAb=r.status==='abandoned';return`<tr style="${isAb?'opacity:.65':''}"><td style="font-size:.82rem">${r.testTitle||'?'}</td><td style="font-size:.8rem;color:var(--sub)">${r.language||'—'}</td><td><strong>${r.wpm}</strong></td><td>${ga(r)}%</td><td style="font-family:monospace">${r.score||'—'}</td><td><span class="tag to">${r.grade||'?'}</span></td><td>${isAb?'<span class="tag tab">⚠️ Quit</span>':'<span class="tag tg">✓ Done</span>'}</td><td style="color:var(--sub);font-size:.78rem;white-space:nowrap">${r.createdAt?.toDate?.()?.toLocaleDateString?.('en-GB')||'—'}</td></tr>`}).join('')}</tbody></table>`;
+  }catch(e){const box=m.querySelector('.em-box');box.innerHTML+=`<p style="color:var(--bad)">Error: ${e.message}</p>`}
+}
+function dlLearnerCSV(id,name){
+  if(!window._ldResults||window._ldResults.id!==id){toast('Open learner detail first.');return}
+  const{results}=window._ldResults;
+  dlCSV(['Test','Language','WPM','Accuracy(%)','Score','Grade','Status','Time(s)','Errors','Date'],results.map(r=>[r.testTitle||'',r.language||'',r.wpm,ga(r),r.score||'',r.grade,r.status||'completed',r.time,r.errors,r.createdAt?.toDate?.()?.toISOString?.()??'']),'learner_'+name.replace(/\s+/g,'_'));
+}
+async function aAssignTeam(lid,tid){await db.collection('learners').doc(lid).update({teamId:tid||FV.delete()});if(S.user&&S.user.id===lid)S.user.teamId=tid||null;toast('Team updated!')}
+async function aDelLearner(id,name){if(!confirm(`Delete "${name}"? Their results are kept.`))return;await db.collection('learners').doc(id).delete();toast('Deleted.');aLearners()}
+
+// ── ADMIN LEADERBOARD (sort toggle WPM/Score + accuracy + team summary) ──
+let _lbRows=[];let _lbTeamFilter='';let _lbSort='wpm';
+async function aLB(){
+  const el=$('apc');el.innerHTML='<p style="color:var(--sub)">Loading...</p>';
+  const[rs,ls,ts]=await Promise.all([db.collection('results').orderBy('wpm','desc').get(),db.collection('learners').get(),db.collection('teams').get()]);
+  const teams={};ts.docs.forEach(d=>teams[d.id]={id:d.id,...d.data()});
+  const learnerTeam={};ls.docs.forEach(d=>{const dd=d.data();if(dd.teamId)learnerTeam[d.id]=dd.teamId});
+  _lbRows=rs.docs.filter(d=>d.data().status!=='abandoned').map(d=>({id:d.id,...d.data()})).map(r=>{const tid=learnerTeam[r.learnerId]||'';return{...r,_teamId:tid,_teamName:teams[tid]?.name||''};});
+  _lbTeamFilter='';_lbSort='wpm';
+  const teamOpts='<option value="">All teams</option>'+Object.values(teams).map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
+  el.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px"><h3>Top Results</h3><button class="bs ba" onclick="exportLBCSV()">⬇ CSV</button></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center"><select id="lb-tf" onchange="filterLB(this.value)" style="width:auto">${teamOpts}</select><div style="display:flex;gap:4px"><button class="df-btn on" id="lbs-wpm" onclick="setLBSort('wpm')">Sort: WPM</button><button class="df-btn" id="lbs-score" onclick="setLBSort('score')">Sort: Score</button></div></div><div id="lb-tbody"></div><div id="lb-teams" style="margin-top:18px"></div>`;
+  renderLBTable('');
+  renderLBTeamSummary(teams,learnerTeam);
+}
+function setLBSort(s){_lbSort=s;$('lbs-wpm').classList.toggle('on',s==='wpm');$('lbs-score').classList.toggle('on',s==='score');renderLBTable(_lbTeamFilter);}
+function filterLB(teamId){_lbTeamFilter=teamId;renderLBTable(teamId);}
+
+// UPDATED: sort toggle + accuracy column
+function renderLBTable(teamId){
+  let rows=teamId?_lbRows.filter(r=>r._teamId===teamId):_lbRows;
+  rows=[...rows].sort((a,b)=>_lbSort==='score'?(b.score||0)-(a.score||0):b.wpm-a.wpm);
+  if(!rows.length){$('lb-tbody').innerHTML='<p style="color:var(--sub);padding:14px 0">No results for this team.</p>';return}
+  $('lb-tbody').innerHTML=`<table class="at"><thead><tr><th>#</th><th>Learner</th><th>Team</th><th>Test</th><th>Level</th><th>WPM</th><th>Acc</th><th>Score</th><th>Grade</th><th></th></tr></thead><tbody>${rows.map((r,i)=>{const L=lvlInfo(r.level||'beginner');return`<tr><td>${i+1}</td><td>${r.learnerName||'?'}</td><td style="font-size:.82rem">${r._teamName?`<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:4px;vertical-align:middle"></span>${r._teamName}`:'<span style="color:var(--sub)">—</span>'}</td><td style="font-size:.82rem">${r.testTitle||''}</td><td><span class="lvl lvl-${L.cls}">${L.emoji} ${L.label}</span></td><td><strong>${r.wpm}</strong></td><td>${ga(r)}%</td><td style="font-family:monospace">${r.score||'—'}</td><td><span class="tag to">${r.grade||'?'}</span></td><td><button class="bs bd" onclick="aDel('results','${r.id}',aLB)">Del</button></td></tr>`}).join('')}</tbody></table>`;
+}
+
+// NEW: team summary card below main leaderboard table
+function renderLBTeamSummary(teams,learnerTeam){
+  const el=$('lb-teams');if(!el)return;
+  const tm={};Object.values(teams).forEach(t=>tm[t.id]={...t,sumWpm:0,sumAcc:0,cnt:0,grades:{A:0,B:0,C:0,D:0,F:0}});
+  _lbRows.forEach(r=>{const tid=r._teamId;if(tid&&tm[tid]){tm[tid].sumWpm+=r.wpm;tm[tid].sumAcc+=ga(r);tm[tid].cnt++;if(r.grade&&tm[tid].grades[r.grade]!=null)tm[tid].grades[r.grade]++}});
+  const sorted=Object.values(tm).filter(t=>t.cnt>0).sort((a,b)=>b.sumWpm-a.sumWpm);
+  if(!sorted.length){el.innerHTML='';return}
+  el.innerHTML=`<h4 style="font-size:.83rem;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Team Summary</h4><table class="at"><thead><tr><th>#</th><th>Team</th><th>Members</th><th>Avg WPM</th><th>Avg Acc</th><th>A grades</th></tr></thead><tbody>${sorted.map((t,i)=>`<tr><td>${i+1}</td><td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${t.color||'#999'};margin-right:5px;vertical-align:middle"></span><strong>${t.name}</strong></td><td>${t.cnt}</td><td style="font-family:monospace"><strong>${Math.round(t.sumWpm/t.cnt)}</strong></td><td>${Math.round(t.sumAcc/t.cnt)}%</td><td>${t.grades.A||0} <span style="color:var(--sub);font-size:.78rem">(${t.cnt?Math.round((t.grades.A/t.cnt)*100):0}%)</span></td></tr>`).join('')}</tbody></table>`;
+}
+
+// UPDATED exportLBCSV: language + accuracy
+function exportLBCSV(){
+  let rows=_lbTeamFilter?_lbRows.filter(r=>r._teamId===_lbTeamFilter):_lbRows;
+  rows=[...rows].sort((a,b)=>_lbSort==='score'?(b.score||0)-(a.score||0):b.wpm-a.wpm);
+  if(!rows.length){toast('No results to export.');return}
+  const label=_lbTeamFilter?rows[0]._teamName||'team':'all-teams';
+  dlCSV(['Rank','Learner','Team','Test','Language','Level','WPM','Accuracy(%)','Score','Grade'],rows.map((r,i)=>[i+1,r.learnerName,r._teamName||'',r.testTitle,r.language||'',r.level||'beginner',r.wpm,ga(r),r.score||'',r.grade]),'leaderboard_'+label);
+}
+
+// ── ADMIN RACES & TEAMS ──
+async function aRaces(){const el=$('apc');el.innerHTML='<p style="color:var(--sub)">Loading...</p>';const[rs,ts]=await Promise.all([db.collection('races').orderBy('createdAt','desc').get(),db.collection('tests').where('active','==',true).get()]);const tests=ts.docs.map(d=>({id:d.id,...d.data()}));const races=rs.docs.map(d=>({id:d.id,...d.data()}));el.innerHTML=`<h3 style="margin-bottom:14px">Races</h3><div class="af"><div><label>Select Test</label><select id="ar-t">${tests.map(t=>`<option value="${t.id}" data-title="${t.title}" data-text="${encodeURIComponent(t.text||'')}" data-dur="${t.duration||60}" data-lvl="${t.level||'beginner'}">${t.title}</option>`).join('')}</select></div><button class="ba bs" onclick="aCreateRace()">+ Create Race</button></div><table class="at"><thead><tr><th>Code</th><th>Test</th><th>Status</th><th>Actions</th></tr></thead><tbody>${races.map(r=>`<tr><td><strong style="font-family:monospace;letter-spacing:.1em">${r.code||'?'}</strong></td><td>${r.testTitle||''}</td><td><span class="tag ${r.status==='lobby'?'tgr':r.status==='racing'?'to':'tg'}">${r.status||'?'}</span></td><td style="display:flex;gap:5px">${r.status==='lobby'?`<button class="bs ba" onclick="aStartRace('${r.id}')">🚀 Start</button>`:r.status==='racing'?`<button class="bs bo" onclick="aEndRace('${r.id}')">End</button>`:''}<button class="bs bd" onclick="aDel('races','${r.id}',aRaces)">Del</button></td></tr>`).join('')}</tbody></table>`}
+async function aCreateRace(){const sel=$('ar-t');if(!sel||!sel.value){toast('Select a test.');return}const opt=sel.options[sel.selectedIndex];const code=randCode();await db.collection('races').add({code,testId:sel.value,testTitle:opt.dataset.title||opt.text,text:decodeURIComponent(opt.dataset.text||''),time:parseInt(opt.dataset.dur)||60,level:opt.dataset.lvl||'beginner',status:'lobby',createdAt:FV.serverTimestamp()});toast('Race created! Code: '+code);aRaces()}
+async function aStartRace(id){await db.collection('races').doc(id).update({status:'racing',startedAt:FV.serverTimestamp()});toast('Race started!');aRaces()}
+async function aEndRace(id){await db.collection('races').doc(id).update({status:'done'});aRaces()}
+async function aTeams(){const el=$('apc');el.innerHTML='<p style="color:var(--sub)">Loading...</p>';const sn=await db.collection('teams').get();const teams=sn.docs.map(d=>({id:d.id,...d.data()}));el.innerHTML=`<h3 style="margin-bottom:14px">Teams</h3><div class="af"><div><label>Team name</label><input type="text" id="tn" placeholder="e.g. Madrid, Lisbon..."></div><div><label>Color</label><input type="color" id="tc2" value="#f4a623" style="width:56px;height:34px;border:2px solid var(--bg3);border-radius:6px;padding:2px;cursor:pointer"></div><button class="ba bs" onclick="aAddTeam()">+ Add Team</button></div><p style="font-size:.8rem;color:var(--sub);margin-bottom:12px">Teams appear as a dropdown on the sign-in screen so learners can self-select.</p><table class="at"><thead><tr><th>Color</th><th>Name</th><th></th></tr></thead><tbody>${teams.map(t=>`<tr><td><span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:${t.color||'#999'}"></span></td><td><strong>${t.name}</strong></td><td><button class="bs bd" onclick="aDel('teams','${t.id}',aTeams)">Del</button></td></tr>`).join('')}</tbody></table>`}
+async function aAddTeam(){const n=($('tn').value||'').trim();const c=$('tc2').value||'#f4a623';if(!n){toast('Name required.');return}await db.collection('teams').add({name:n,color:c,createdAt:FV.serverTimestamp()});toast('Team added!');aTeams();loadTeamsForWelcome()}
+
+// ── INIT ──
+showGsTab('beginner',document.querySelector('.gs-tab.b'));
+loadTeamsForWelcome();
+(function(){const p=new URLSearchParams(location.search);if(p.get('admin')==='backmarket2026'){showView('admin');aTab('tests')}})();
+</script>
+</body>
+</html>
