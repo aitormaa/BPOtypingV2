@@ -282,7 +282,7 @@ function buildLangTabs(){var langs=[...new Set(S.allTests.map(function(t){return
 function filterLang(lv,btn){S.langFilter=lv;document.querySelectorAll('#lang-tabs .lf-tab').forEach(function(b){b.classList.remove('on');});btn.classList.add('on');renderLib();}
 function filterLevel(lv,btn){S.lvlFilter=lv;document.querySelectorAll('#lvl-tabs .lf-tab').forEach(function(b){b.classList.remove('on');});btn.classList.add('on');renderLib();}
 function renderLib(){var f=S.lvlFilter,lg=S.langFilter;function testMatch(t){return(f==='all'||f===(t.level||'beginner'))&&(lg==='all'||(t.language||'')===lg);}var feat=S.allTests.find(function(t){return t.id===S.featId;});$('fw').innerHTML=(feat&&testMatch(feat))?tCard(feat,true):'';var rest=S.allTests.filter(function(t){return t.id!==S.featId&&testMatch(t);});$('tl').innerHTML=rest.length?rest.map(function(t){return tCard(t,false);}).join(''):'<p style="color:var(--sub);padding:8px 0">No tests for this filter.</p>';}
-function tCard(t,feat){var wc=t.text?(t.text.trim().split(/\s+/).length):0;var L=lvlInfo(t.level||'beginner');var langBadge=t.language?'<span style="font-size:.78rem;background:var(--bg3);padding:2px 7px;border-radius:20px">🌐 '+t.language+'</span>':'';var pb=S.myBests&&S.myBests[t.id];var pbHtml=pb?'<div class="pb-bar">🏆 Your best: <strong style="font-family:monospace">'+pb.wpm+' WPM</strong> <span class="tag to">'+pb.grade+'</span> <span style="color:var(--sub)">'+pb.acc+'% acc</span></div>':'';return '<div class="tc-card'+(feat?' feat':'')+'" onclick="startTest(\''+t.id+'\')"><div style="flex:1"><div style="font-weight:700;font-size:1rem;margin-bottom:4px">'+( t.title||'Untitled')+(feat?'<span class="fb">⭐ FEATURED</span>':'')+'</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span class="lvl lvl-'+L.cls+'">'+L.emoji+' '+L.label+'</span>'+langBadge+'<span style="font-size:.78rem;color:var(--sub)">'+wc+' words'+(t.category?' · '+t.category:'')+'</span></div>'+pbHtml+'</div><div style="color:var(--sub);font-size:1.2rem;flex-shrink:0">→</div></div>';}
+function tCard(t,feat){var wc=t.text?(t.text.trim().split(/\s+/).length):0;var L=lvlInfo(t.level||'beginner');var langBadge=t.language?'<span style="font-size:.78rem;background:var(--bg3);padding:2px 7px;border-radius:20px">🌐 '+t.language+'</span>':'';var pb=S.myBests&&S.myBests[t.id];var pbHtml=pb?'<div class="pb-bar">🏆 Your best: <strong style="font-family:monospace">'+pb.wpm+' WPM</strong> <span class="tag to">'+pb.grade+'</span> <span style="color:var(--sub)">'+pb.acc+'% acc</span></div>':'';return '<div class="tc-card'+(feat?' feat':'')+'" onclick="startTest(\''+t.id+'\')"><div style="flex:1"><div style="font-weight:700;font-size:1rem;margin-bottom:4px">'+(t.title||'Untitled')+(feat?'<span class="fb">⭐ FEATURED</span>':'')+'</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span class="lvl lvl-'+L.cls+'">'+L.emoji+' '+L.label+'</span>'+langBadge+'<span style="font-size:.78rem;color:var(--sub)">'+wc+' words'+(t.category?' · '+t.category:'')+'</span></div>'+pbHtml+'</div><div style="color:var(--sub);font-size:1.2rem;flex-shrink:0">→</div></div>';}
 function showJoinRace(){var c=prompt('Enter race code:');if(c)joinRace(c.trim().toUpperCase());}
 async function startTest(id){var doc=await db.collection('tests').doc(id).get();if(!doc.exists){toast('Test not found.');return;}S.test=Object.assign({id:doc.id},doc.data());S.raceId=null;$('rh').style.display='none';initEngine();showView('test');startCountdown(function(){fhi();});}
 function initEngine(){var words=S.test.text.trim().split(/\s+/);S.words=words;S.wEls=[];S.wI=0;S.cI=0;S.errs=0;S.typed=0;S.cc=0;S.startT=null;S.tLeft=S.test.duration||60;S.rWU=0;S.counting=false;clearInterval(S.tmr);$('tt').textContent=S.test.title||'Test';$('sw').textContent='0';$('sa').textContent='100';$('st').textContent=S.tLeft;$('st').classList.remove('timer-critical');$('se').textContent='0';$('tpb').style.width='0';var wi=$('wi');wi.style.transform='translateY(0)';wi.innerHTML='';words.forEach(function(w){var el=document.createElement('div');el.className='word';Array.from(w).forEach(function(ch){var s=document.createElement('span');s.className='ch';s.textContent=ch;el.appendChild(s);});wi.appendChild(el);S.wEls.push(el);});hlCur();$('hi').value='';$('hi').onkeydown=handleKey;}
@@ -370,10 +370,12 @@ var _adminTestRows=[];
 var _adminTestLvlFilter='';
 var _adminTestLangFilter='';
 var _adminTestDurFilter='';
+var _adminTestCatFilter='';
 function filterAdminTests(){
   _adminTestLvlFilter=($('atf-lvl')||{value:''}).value||'';
   _adminTestLangFilter=($('atf-lang')||{value:''}).value||'';
   _adminTestDurFilter=($('atf-dur')||{value:''}).value||'';
+  _adminTestCatFilter=($('atf-cat')||{value:''}).value||'';
   renderAdminTestsTable();
 }
 function renderAdminTestsTable(){
@@ -381,21 +383,25 @@ function renderAdminTestsTable(){
   if(_adminTestLvlFilter)rows=rows.filter(function(t){return(t.level||'beginner')===_adminTestLvlFilter;});
   if(_adminTestLangFilter)rows=rows.filter(function(t){return(t.language||'')===_adminTestLangFilter;});
   if(_adminTestDurFilter)rows=rows.filter(function(t){return String(t.duration||60)===_adminTestDurFilter;});
+  if(_adminTestCatFilter)rows=rows.filter(function(t){return(t.category||'').toLowerCase()===_adminTestCatFilter.toLowerCase();});
   var tbody=$('admin-tests-tbody');
   if(!tbody)return;
   var fc=$('atf-count');
   if(fc)fc.textContent=rows.length+' test'+(rows.length!==1?'s':'');
-  if(!rows.length){tbody.innerHTML='<tr><td colspan="7" style="padding:14px;color:var(--sub)">No tests match this filter.</td></tr>';return;}
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="8" style="padding:14px;color:var(--sub)">No tests match this filter.</td></tr>';return;}
   tbody.innerHTML=rows.map(function(t){
     var wc=t.text?t.text.trim().split(/\s+/).length:0;
     var L=lvlInfo(t.level||'beginner');
     var isFeat=t.id===S.featId;
     var isInt=(t.level||'beginner')==='intermediate';
     var langLabel=t.language||'<span style="color:var(--sub)">—</span>';
-    return '<tr><td><strong>'+(t.title||'?')+'</strong>'+(isFeat?' <span class="tag to">⭐</span>':'')+'</td>'
+    var catLabel=t.category||'<span style="color:var(--sub)">—</span>';
+    return '<tr>'
+      +'<td><strong>'+(t.title||'?')+'</strong>'+(isFeat?' <span class="tag to">⭐</span>':'')+'</td>'
       +'<td><span class="lvl lvl-'+L.cls+'">'+L.emoji+' '+L.label+'</span></td>'
       +'<td style="font-size:.82rem">'+langLabel+'</td>'
       +'<td>'+wc+'</td>'
+      +'<td style="font-size:.82rem">'+catLabel+'</td>'
       +'<td style="font-size:.85rem;font-family:monospace">'+(t.duration||60)+'s</td>'
       +'<td><span class="tag '+(t.active?'tg':'tgr')+'">'+(t.active?'Active':'Off')+'</span></td>'
       +'<td style="display:flex;gap:5px;flex-wrap:wrap">'
@@ -412,15 +418,19 @@ async function aTests(){
   el.innerHTML='<p style="color:var(--sub)">Loading...</p>';
   var sn=await db.collection('tests').orderBy('createdAt','desc').get();
   _adminTestRows=sn.docs.map(function(d){return Object.assign({id:d.id},d.data());});
-  _adminTestLvlFilter='';_adminTestLangFilter='';_adminTestDurFilter='';
+  _adminTestLvlFilter='';_adminTestLangFilter='';_adminTestDurFilter='';_adminTestCatFilter='';
   var langs=[...new Set(_adminTestRows.map(function(t){return t.language||'';}).filter(Boolean))].sort();
   var langFilterOpts='<option value="">All languages</option>'+langs.map(function(l){return '<option value="'+l+'">'+l+'</option>';}).join('');
+  var seenCats={};var cats=[];
+  _adminTestRows.forEach(function(t){if(t.category){var lo=t.category.toLowerCase();if(!seenCats[lo]){seenCats[lo]=t.category;cats.push(t.category);}}});
+  cats.sort(function(a,b){return a.toLowerCase().localeCompare(b.toLowerCase());});
+  var catFilterOpts='<option value="">All categories</option>'+cats.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join('');
   var html='<h3 style="margin-bottom:14px">Tests</h3>';
   html+='<div class="af">';
   html+='<div><label>Title</label><input type="text" id="at-t" placeholder="Test title"></div>';
   html+='<div><label>Level</label><select id="at-l"><option value="beginner">🌱 Beginner</option><option value="intermediate">📘 Intermediate</option></select></div>';
   html+='<div><label>Language (optional)</label>'+makeLangToggle('at','')+'</div>';
-  html+='<div><label>Category (optional)</label><input type="text" id="at-c" placeholder="Category"></div>';
+  html+='<div><label>Category (optional)</label><input type="text" id="at-c" placeholder="e.g. Service Client, Warm Up..."></div>';
   html+='<div><label>Duration</label>'+durSelect('at-d',60)+'</div>';
   html+='<div><label>Text</label><textarea id="at-x" rows="4" placeholder="Paste test text here..."></textarea></div>';
   html+='<button class="ba bs" onclick="aAddTest()">+ Add Test</button>';
@@ -429,9 +439,10 @@ async function aTests(){
   html+='<select id="atf-lvl" onchange="filterAdminTests()" style="width:auto"><option value="">All levels</option><option value="beginner">🌱 Beginner</option><option value="intermediate">📘 Intermediate</option></select>';
   html+='<select id="atf-lang" onchange="filterAdminTests()" style="width:auto">'+langFilterOpts+'</select>';
   html+='<select id="atf-dur" onchange="filterAdminTests()" style="width:auto"><option value="">All durations</option><option value="30">30s</option><option value="45">45s</option><option value="60">60s</option><option value="90">90s</option><option value="120">2 min</option><option value="180">3 min</option></select>';
+  html+='<select id="atf-cat" onchange="filterAdminTests()" style="width:auto">'+catFilterOpts+'</select>';
   html+='<span id="atf-count" style="font-size:.82rem;color:var(--sub)">'+_adminTestRows.length+' tests</span>';
   html+='</div>';
-  html+='<table class="at"><thead><tr><th>Title</th><th>Level</th><th>Language</th><th>Words</th><th>Duration</th><th>Status</th><th>Actions</th></tr></thead><tbody id="admin-tests-tbody"></tbody></table>';
+  html+='<table class="at"><thead><tr><th>Title</th><th>Level</th><th>Language</th><th>Words</th><th>Category</th><th>Duration</th><th>Status</th><th>Actions</th></tr></thead><tbody id="admin-tests-tbody"></tbody></table>';
   el.innerHTML=html;
   renderAdminTestsTable();
 }
@@ -446,9 +457,9 @@ async function aEditTest(id){
   var m=document.createElement('div');m.className='em-overlay';m.id='em';
   var html='<div class="em-box"><h3 style="margin-bottom:16px">✏️ Edit Test</h3><div class="af">';
   html+='<div><label>Title</label><input type="text" id="et-t" value="'+(t.title||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;')+'"></div>';
-  html+='<div><label>Level</label><select id="et-l"><option value="beginner"'+(  (t.level||'beginner')==='beginner'?' selected':'')+'>🌱 Beginner</option><option value="intermediate"'+(t.level==='intermediate'?' selected':'')+'>📘 Intermediate</option></select></div>';
+  html+='<div><label>Level</label><select id="et-l"><option value="beginner"'+((t.level||'beginner')==='beginner'?' selected':'')+'>🌱 Beginner</option><option value="intermediate"'+(t.level==='intermediate'?' selected':'')+'>📘 Intermediate</option></select></div>';
   html+='<div><label>Language</label>'+makeLangToggle('et',t.language||'')+'</div>';
-  html+='<div><label>Category</label><input type="text" id="et-c" value="'+(t.category||'').replace(/"/g,'&quot;')+'"></div>';
+  html+='<div><label>Category</label><input type="text" id="et-c" value="'+(t.category||'').replace(/"/g,'&quot;')+'" placeholder="e.g. Service Client, Warm Up..."></div>';
   html+='<div><label>Duration</label>'+durSelect('et-d',t.duration||60)+'</div>';
   html+='<div><label>Text</label><textarea id="et-x" rows="7">'+(t.text||'').replace(/</g,'&lt;')+'</textarea></div>';
   html+='</div><div style="display:flex;gap:9px;justify-content:flex-end;margin-top:8px"><button class="bo bs" onclick="document.getElementById(\'em\').remove()">Cancel</button><button class="ba bs" onclick="aSaveEdit(\''+id+'\')">💾 Save</button></div></div>';
