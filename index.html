@@ -370,10 +370,12 @@ var _adminTestRows=[];
 var _adminTestLvlFilter='';
 var _adminTestLangFilter='';
 var _adminTestDurFilter='';
+var _adminTestCatFilter='';
 function filterAdminTests(){
   _adminTestLvlFilter=($('atf-lvl')||{value:''}).value||'';
   _adminTestLangFilter=($('atf-lang')||{value:''}).value||'';
   _adminTestDurFilter=($('atf-dur')||{value:''}).value||'';
+  _adminTestCatFilter=($('atf-cat')||{value:''}).value||'';
   renderAdminTestsTable();
 }
 function renderAdminTestsTable(){
@@ -381,21 +383,24 @@ function renderAdminTestsTable(){
   if(_adminTestLvlFilter)rows=rows.filter(function(t){return(t.level||'beginner')===_adminTestLvlFilter;});
   if(_adminTestLangFilter)rows=rows.filter(function(t){return(t.language||'')===_adminTestLangFilter;});
   if(_adminTestDurFilter)rows=rows.filter(function(t){return String(t.duration||60)===_adminTestDurFilter;});
+  if(_adminTestCatFilter)rows=rows.filter(function(t){return(t.category||'').toLowerCase()===_adminTestCatFilter.toLowerCase();});
   var tbody=$('admin-tests-tbody');
   if(!tbody)return;
   var fc=$('atf-count');
   if(fc)fc.textContent=rows.length+' test'+(rows.length!==1?'s':'');
-  if(!rows.length){tbody.innerHTML='<tr><td colspan="7" style="padding:14px;color:var(--sub)">No tests match this filter.</td></tr>';return;}
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="8" style="padding:14px;color:var(--sub)">No tests match this filter.</td></tr>';return;}
   tbody.innerHTML=rows.map(function(t){
     var wc=t.text?t.text.trim().split(/\s+/).length:0;
     var L=lvlInfo(t.level||'beginner');
     var isFeat=t.id===S.featId;
     var isInt=(t.level||'beginner')==='intermediate';
     var langLabel=t.language||'<span style="color:var(--sub)">—</span>';
+    var catLabel=t.category||'<span style="color:var(--sub)">—</span>';
     return '<tr><td><strong>'+(t.title||'?')+'</strong>'+(isFeat?' <span class="tag to">⭐</span>':'')+'</td>'
       +'<td><span class="lvl lvl-'+L.cls+'">'+L.emoji+' '+L.label+'</span></td>'
       +'<td style="font-size:.82rem">'+langLabel+'</td>'
       +'<td>'+wc+'</td>'
+      +'<td style="font-size:.82rem">'+catLabel+'</td>'
       +'<td style="font-size:.85rem;font-family:monospace">'+(t.duration||60)+'s</td>'
       +'<td><span class="tag '+(t.active?'tg':'tgr')+'">'+(t.active?'Active':'Off')+'</span></td>'
       +'<td style="display:flex;gap:5px;flex-wrap:wrap">'
@@ -412,9 +417,13 @@ async function aTests(){
   el.innerHTML='<p style="color:var(--sub)">Loading...</p>';
   var sn=await db.collection('tests').orderBy('createdAt','desc').get();
   _adminTestRows=sn.docs.map(function(d){return Object.assign({id:d.id},d.data());});
-  _adminTestLvlFilter='';_adminTestLangFilter='';_adminTestDurFilter='';
+  _adminTestLvlFilter='';_adminTestLangFilter='';_adminTestDurFilter='';_adminTestCatFilter='';
   var langs=[...new Set(_adminTestRows.map(function(t){return t.language||'';}).filter(Boolean))].sort();
   var langFilterOpts='<option value="">All languages</option>'+langs.map(function(l){return '<option value="'+l+'">'+l+'</option>';}).join('');
+  var seenCats={};var cats=[];
+  _adminTestRows.forEach(function(t){if(t.category){var lo=t.category.toLowerCase();if(!seenCats[lo]){seenCats[lo]=true;cats.push(t.category);}}});
+  cats.sort(function(a,b){return a.toLowerCase().localeCompare(b.toLowerCase());});
+  var catFilterOpts='<option value="">All categories</option>'+cats.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join('');
   var html='<h3 style="margin-bottom:14px">Tests</h3>';
   html+='<div class="af">';
   html+='<div><label>Title</label><input type="text" id="at-t" placeholder="Test title"></div>';
@@ -429,9 +438,10 @@ async function aTests(){
   html+='<select id="atf-lvl" onchange="filterAdminTests()" style="width:auto"><option value="">All levels</option><option value="beginner">🌱 Beginner</option><option value="intermediate">📘 Intermediate</option></select>';
   html+='<select id="atf-lang" onchange="filterAdminTests()" style="width:auto">'+langFilterOpts+'</select>';
   html+='<select id="atf-dur" onchange="filterAdminTests()" style="width:auto"><option value="">All durations</option><option value="30">30s</option><option value="45">45s</option><option value="60">60s</option><option value="90">90s</option><option value="120">2 min</option><option value="180">3 min</option></select>';
+  html+='<select id="atf-cat" onchange="filterAdminTests()" style="width:auto">'+catFilterOpts+'</select>';
   html+='<span id="atf-count" style="font-size:.82rem;color:var(--sub)">'+_adminTestRows.length+' tests</span>';
   html+='</div>';
-  html+='<table class="at"><thead><tr><th>Title</th><th>Level</th><th>Language</th><th>Words</th><th>Duration</th><th>Status</th><th>Actions</th></tr></thead><tbody id="admin-tests-tbody"></tbody></table>';
+  html+='<table class="at"><thead><tr><th>Title</th><th>Level</th><th>Language</th><th>Words</th><th>Category</th><th>Duration</th><th>Status</th><th>Actions</th></tr></thead><tbody id="admin-tests-tbody"></tbody></table>';
   el.innerHTML=html;
   renderAdminTestsTable();
 }
@@ -446,7 +456,7 @@ async function aEditTest(id){
   var m=document.createElement('div');m.className='em-overlay';m.id='em';
   var html='<div class="em-box"><h3 style="margin-bottom:16px">✏️ Edit Test</h3><div class="af">';
   html+='<div><label>Title</label><input type="text" id="et-t" value="'+(t.title||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;')+'"></div>';
-  html+='<div><label>Level</label><select id="et-l"><option value="beginner"'+(  (t.level||'beginner')==='beginner'?' selected':'')+'>🌱 Beginner</option><option value="intermediate"'+(t.level==='intermediate'?' selected':'')+'>📘 Intermediate</option></select></div>';
+  html+='<div><label>Level</label><select id="et-l"><option value="beginner"'+((t.level||'beginner')==='beginner'?' selected':'')+'>🌱 Beginner</option><option value="intermediate"'+(t.level==='intermediate'?' selected':'')+'>📘 Intermediate</option></select></div>';
   html+='<div><label>Language</label>'+makeLangToggle('et',t.language||'')+'</div>';
   html+='<div><label>Category</label><input type="text" id="et-c" value="'+(t.category||'').replace(/"/g,'&quot;')+'"></div>';
   html+='<div><label>Duration</label>'+durSelect('et-d',t.duration||60)+'</div>';
@@ -466,10 +476,24 @@ function applyResultFilters(){_resultTeamFilter=($('res-tf')||{value:''}).value|
 function resultDateOk(r){if(_resultDateFilter==='all')return true;var d=r.createdAt&&r.createdAt.toDate&&r.createdAt.toDate();if(!d)return true;return Date.now()-d.getTime()<(_resultDateFilter==='7d'?7:30)*864e5;}
 function renderResultsTable(){var rows=_resultRows.slice();if(_resultTeamFilter)rows=rows.filter(function(r){return r._teamId===_resultTeamFilter;});if(_resultTestFilter)rows=rows.filter(function(r){return r.testId===_resultTestFilter;});rows=rows.filter(resultDateOk);var cnt=$('res-count');if(cnt)cnt.textContent='Showing '+rows.length+' result'+(rows.length!==1?'s':'');if(!rows.length){$('res-tbody').innerHTML='<p style="color:var(--sub);padding:14px 0">No results match this filter.</p>';return;}$('res-tbody').innerHTML='<table class="at"><thead><tr><th>Learner</th><th>Team</th><th>Test</th><th>Lang</th><th>Level</th><th>WPM</th><th>Acc</th><th>Score</th><th>Grade</th><th>Status</th><th>Date</th><th></th></tr></thead><tbody>'+rows.map(function(r){var L=lvlInfo(r.level||'beginner');var isAb=r.status==='abandoned';return '<tr style="'+(isAb?'opacity:.75':'')+'"><td>'+(r.learnerName||'?')+'</td><td style="font-size:.82rem">'+(r._teamName?'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:4px;vertical-align:middle"></span>'+r._teamName:'<span style="color:var(--sub)">—</span>')+'</td><td style="color:var(--sub);font-size:.8rem">'+(r.testTitle||'')+'</td><td style="font-size:.8rem">'+(r.language||'<span style="color:var(--sub)">—</span>')+'</td><td><span class="lvl lvl-'+L.cls+'">'+L.emoji+'</span></td><td><strong>'+r.wpm+'</strong></td><td>'+ga(r)+'%</td><td style="font-family:monospace">'+(r.score||'—')+'</td><td><span class="tag to">'+(r.grade||'?')+'</span></td><td>'+(isAb?'<span class="tag tab">⚠️ Quit</span>':'<span class="tag tg">✓ Done</span>')+'</td><td style="color:var(--sub);font-size:.78rem;white-space:nowrap">'+(r.createdAt&&r.createdAt.toDate&&r.createdAt.toDate().toLocaleDateString('en-GB')||'—')+'</td><td><button class="bs bd" onclick="aDel(\'results\',\''+r.id+'\',aResults)">Del</button></td></tr>';}).join('')+'</tbody></table>';}
 function exportResultsCSV(){var rows=_resultRows.slice();if(_resultTeamFilter)rows=rows.filter(function(r){return r._teamId===_resultTeamFilter;});if(_resultTestFilter)rows=rows.filter(function(r){return r.testId===_resultTestFilter;});rows=rows.filter(resultDateOk);if(!rows.length){toast('No results to export.');return;}dlCSV(['Learner','Team','Test','Language','Level','WPM','Accuracy(%)','Score','Grade','Status','Time(s)','Errors','Date'],rows.map(function(r){return[r.learnerName,r._teamName||'',r.testTitle,r.language||'',r.level||'beginner',r.wpm,ga(r),r.score||'',r.grade,r.status||'completed',r.time,r.errors,r.createdAt&&r.createdAt.toDate&&r.createdAt.toDate().toISOString()||''];}), 'results');}
-var _learnerRows=[];var _learnerTeamFilter='';var _learnerTeamsMap={};
-async function aLearners(){var el=$('apc');el.innerHTML='<p style="color:var(--sub)">Loading...</p>';var res=await Promise.all([db.collection('learners').get(),db.collection('teams').get()]);var ls=res[0],ts=res[1];_learnerTeamsMap={};ts.docs.forEach(function(d){_learnerTeamsMap[d.id]=Object.assign({id:d.id},d.data());});_learnerRows=ls.docs.map(function(d){return Object.assign({id:d.id},d.data());}).map(function(l){return Object.assign({},l,{_teamName:l.teamId&&_learnerTeamsMap[l.teamId]?_learnerTeamsMap[l.teamId].name:'',_teamColor:l.teamId&&_learnerTeamsMap[l.teamId]?_learnerTeamsMap[l.teamId].color||'#999':'',_teamId:l.teamId||''});});_learnerTeamFilter='';var teamFilterOpts='<option value="">All teams</option>'+Object.values(_learnerTeamsMap).map(function(t){return '<option value="'+t.id+'">'+t.name+'</option>';}).join('');el.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px"><h3>Learners ('+_learnerRows.length+')</h3><select id="lrn-tf" onchange="filterLearners(this.value)" style="width:auto">'+teamFilterOpts+'</select></div><div id="lrn-tbody"></div>';renderLearnersTable('');}
-function filterLearners(teamId){_learnerTeamFilter=teamId;renderLearnersTable(teamId);}
-function renderLearnersTable(teamId){var rows=teamId?_learnerRows.filter(function(l){return l._teamId===teamId;}):_learnerRows;if(!rows.length){$('lrn-tbody').innerHTML='<p style="color:var(--sub);padding:14px 0">No learners for this team.</p>';return;}var topts=Object.values(_learnerTeamsMap).map(function(t){return '<option value="'+t.id+'">'+t.name+'</option>';}).join('');$('lrn-tbody').innerHTML='<table class="at"><thead><tr><th>Name</th><th>Email</th><th>Team</th><th>Assign Team</th><th></th></tr></thead><tbody>'+rows.map(function(l){return '<tr><td><strong style="cursor:pointer;color:var(--accent);text-decoration:underline;text-decoration-style:dotted" onclick="aLearnerDetail(\''+l.id+'\',\''+((l.name||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"))+'\')">  '+(l.name||'?')+'</strong></td><td style="color:var(--sub);font-size:.8rem">'+(l.email||'—')+'</td><td>'+(l._teamName?'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+l._teamColor+';margin-right:4px"></span>'+l._teamName:'—')+'</td><td><select onchange="aAssignTeam(\''+l.id+'\',this.value)" style="width:auto"><option value="">No team</option>'+topts+'</select></td><td><button class="bs bd" onclick="aDelLearner(\''+l.id+'\',\''+((l.name||'').replace(/'/g,"\\'"))+'\')">🗑</button></td></tr>';}).join('')+'</tbody></table>';}
+var _learnerRows=[];var _learnerTeamFilter='';var _learnerTeamsMap={};var _learnerCatFilter='';var _learnerCatsMap={};
+async function aLearners(){
+  var el=$('apc');el.innerHTML='<p style="color:var(--sub)">Loading...</p>';
+  var res=await Promise.all([db.collection('learners').get(),db.collection('teams').get(),db.collection('tests').get(),db.collection('results').get()]);
+  var ls=res[0],ts=res[1],testsSn=res[2],resultsSn=res[3];
+  _learnerTeamsMap={};ts.docs.forEach(function(d){_learnerTeamsMap[d.id]=Object.assign({id:d.id},d.data());});
+  _learnerRows=ls.docs.map(function(d){return Object.assign({id:d.id},d.data());}).map(function(l){return Object.assign({},l,{_teamName:l.teamId&&_learnerTeamsMap[l.teamId]?_learnerTeamsMap[l.teamId].name:'',_teamColor:l.teamId&&_learnerTeamsMap[l.teamId]?_learnerTeamsMap[l.teamId].color||'#999':'',_teamId:l.teamId||''});});
+  var testCatMap={};testsSn.docs.forEach(function(d){var data=d.data();if(data.category)testCatMap[d.id]=data.category;});
+  _learnerCatsMap={};resultsSn.docs.forEach(function(d){var r=d.data();if(!r.learnerId)return;var cat=testCatMap[r.testId];if(!cat)return;if(!_learnerCatsMap[r.learnerId])_learnerCatsMap[r.learnerId]={};_learnerCatsMap[r.learnerId][cat.toLowerCase()]=true;});
+  var seenCats={};var allCats=[];Object.values(testCatMap).forEach(function(c){var lo=c.toLowerCase();if(!seenCats[lo]){seenCats[lo]=true;allCats.push(c);}});allCats.sort(function(a,b){return a.toLowerCase().localeCompare(b.toLowerCase());});
+  _learnerTeamFilter='';_learnerCatFilter='';
+  var teamFilterOpts='<option value="">All teams</option>'+Object.values(_learnerTeamsMap).map(function(t){return '<option value="'+t.id+'">'+t.name+'</option>';}).join('');
+  var catFilterOpts='<option value="">All categories</option>'+allCats.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join('');
+  el.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px"><h3>Learners ('+_learnerRows.length+')</h3><div style="display:flex;gap:8px;flex-wrap:wrap"><select id="lrn-tf" onchange="filterLearners()" style="width:auto">'+teamFilterOpts+'</select><select id="lrn-catf" onchange="filterLearners()" style="width:auto">'+catFilterOpts+'</select></div></div><div id="lrn-tbody"></div>';
+  renderLearnersTable();
+}
+function filterLearners(){_learnerTeamFilter=($('lrn-tf')||{value:''}).value||'';_learnerCatFilter=($('lrn-catf')||{value:''}).value||'';renderLearnersTable();}
+function renderLearnersTable(){var rows=_learnerRows.slice();if(_learnerTeamFilter)rows=rows.filter(function(l){return l._teamId===_learnerTeamFilter;});if(_learnerCatFilter)rows=rows.filter(function(l){var cats=_learnerCatsMap[l.id];return cats&&cats[_learnerCatFilter.toLowerCase()];});if(!rows.length){$('lrn-tbody').innerHTML='<p style="color:var(--sub);padding:14px 0">No learners match this filter.</p>';return;}var topts=Object.values(_learnerTeamsMap).map(function(t){return '<option value="'+t.id+'">'+t.name+'</option>';}).join('');$('lrn-tbody').innerHTML='<table class="at"><thead><tr><th>Name</th><th>Email</th><th>Team</th><th>Assign Team</th><th></th></tr></thead><tbody>'+rows.map(function(l){return '<tr><td><strong style="cursor:pointer;color:var(--accent);text-decoration:underline;text-decoration-style:dotted" onclick="aLearnerDetail(\''+l.id+'\',\''+((l.name||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"))+'\')">  '+(l.name||'?')+'</strong></td><td style="color:var(--sub);font-size:.8rem">'+(l.email||'—')+'</td><td>'+(l._teamName?'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+l._teamColor+';margin-right:4px"></span>'+l._teamName:'—')+'</td><td><select onchange="aAssignTeam(\''+l.id+'\',this.value)" style="width:auto"><option value="">No team</option>'+topts+'</select></td><td><button class="bs bd" onclick="aDelLearner(\''+l.id+'\',\''+((l.name||'').replace(/'/g,"\\'"))+'\')">🗑</button></td></tr>';}).join('')+'</tbody></table>';}
 async function aLearnerDetail(id,name){var m=document.createElement('div');m.className='em-overlay';m.id='em-ld';m.innerHTML='<div class="em-box"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><h3>📋 '+name+'</h3><button class="bo bs" onclick="document.getElementById(\'em-ld\').remove()">✕ Close</button></div><p style="color:var(--sub);font-size:.85rem">Loading...</p></div>';document.body.appendChild(m);m.addEventListener('click',function(e){if(e.target===m)m.remove();});try{var sn=await db.collection('results').where('learnerId','==',id).orderBy('createdAt','desc').get();var results=sn.docs.map(function(d){return Object.assign({id:d.id},d.data());});var box=m.querySelector('.em-box');if(!results.length){box.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><h3>📋 '+name+'</h3><button class="bo bs" onclick="document.getElementById(\'em-ld\').remove()">✕ Close</button></div><p style="color:var(--sub)">No results yet.</p>';return;}var completed=results.filter(function(r){return r.status!=='abandoned';});var wpms=completed.map(function(r){return r.wpm;}).filter(function(w){return w>0;});var accs=completed.map(function(r){return ga(r);});var avgWpm=wpms.length?Math.round(wpms.reduce(function(a,b){return a+b;},0)/wpms.length):0;var bestWpm=wpms.length?Math.max.apply(null,wpms):0;var avgAcc=accs.length?Math.round(accs.reduce(function(a,b){return a+b;},0)/accs.length):0;var bestAcc=accs.length?Math.max.apply(null,accs):0;window._ldResults={id:id,name:name,results:results};box.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px"><h3>📋 '+name+'</h3><div style="display:flex;gap:8px"><button class="ba bs" onclick="dlLearnerCSV(\''+id+'\',\''+name.replace(/'/g,"\\'")+'\')">⬇ CSV</button><button class="bo bs" onclick="document.getElementById(\'em-ld\').remove()">✕ Close</button></div></div><div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">'+[['Tests',completed.length],['Best WPM',bestWpm],['Avg WPM',avgWpm],['Avg Acc',avgAcc+'%'],['Best Acc',bestAcc+'%']].map(function(x){return '<div style="background:var(--bg);border-radius:6px;padding:8px 14px;text-align:center"><strong style="display:block;font-size:1.15rem;font-family:monospace">'+x[1]+'</strong><span style="font-size:.72rem;color:var(--sub)">'+x[0]+'</span></div>';}).join('')+'</div><table class="at"><thead><tr><th>Test</th><th>Lang</th><th>WPM</th><th>Acc</th><th>Score</th><th>Grade</th><th>Status</th><th>Date</th></tr></thead><tbody>'+results.map(function(r){var isAb=r.status==='abandoned';return '<tr style="'+(isAb?'opacity:.65':'')+'"><td style="font-size:.82rem">'+(r.testTitle||'?')+'</td><td style="font-size:.8rem;color:var(--sub)">'+(r.language||'—')+'</td><td><strong>'+r.wpm+'</strong></td><td>'+ga(r)+'%</td><td style="font-family:monospace">'+(r.score||'—')+'</td><td><span class="tag to">'+(r.grade||'?')+'</span></td><td>'+(isAb?'<span class="tag tab">⚠️ Quit</span>':'<span class="tag tg">✓ Done</span>')+'</td><td style="color:var(--sub);font-size:.78rem;white-space:nowrap">'+(r.createdAt&&r.createdAt.toDate&&r.createdAt.toDate().toLocaleDateString('en-GB')||'—')+'</td></tr>';}).join('')+'</tbody></table>';}catch(e){var box=m.querySelector('.em-box');box.innerHTML+='<p style="color:var(--bad)">Error: '+e.message+'</p>';}}
 function dlLearnerCSV(id,name){if(!window._ldResults||window._ldResults.id!==id){toast('Open learner detail first.');return;}dlCSV(['Test','Language','WPM','Accuracy(%)','Score','Grade','Status','Time(s)','Errors','Date'],window._ldResults.results.map(function(r){return[r.testTitle||'',r.language||'',r.wpm,ga(r),r.score||'',r.grade,r.status||'completed',r.time,r.errors,r.createdAt&&r.createdAt.toDate&&r.createdAt.toDate().toISOString()||''];}), 'learner_'+name.replace(/\s+/g,'_'));}
 async function aAssignTeam(lid,tid){await db.collection('learners').doc(lid).update({teamId:tid||FV.delete()});if(S.user&&S.user.id===lid)S.user.teamId=tid||null;toast('Team updated!');}
@@ -491,7 +515,7 @@ async function aTeams(){var el=$('apc');el.innerHTML='<p style="color:var(--sub)
 async function aAddTeam(){var n=($('tn').value||'').trim();var c=$('tc2').value||'#f4a623';if(!n){toast('Name required.');return;}await db.collection('teams').add({name:n,color:c,createdAt:FV.serverTimestamp()});toast('Team added!');aTeams();loadTeamsForWelcome();}
 showGsTab('beginner',document.querySelector('.gs-tab.b'));
 loadTeamsForWelcome();
-(function(){var p=new URLSearchParams(location.search);if(p.get('admin')==='backmarket2026'){showView('admin');aTab('tests');}})();
+setTimeout(function(){try{var p=new URLSearchParams(location.search);if(p.get('admin')==='backmarket2026'){showView('admin');aTab('tests');}}catch(e){console.error('Admin redirect error:',e);}},150);
 </script>
 </body>
 </html>
