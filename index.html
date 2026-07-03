@@ -172,7 +172,7 @@ button:disabled{opacity:.38;cursor:not-allowed;transform:none!important}
     <div class="rs"><div><strong id="rw">0</strong><span>WPM</span></div><div><strong id="ra">0</strong><span>Accuracy</span></div><div class="score-stat"><strong id="rsc">0</strong><span>Score</span></div><div><strong id="rt">0</strong><span>Seconds</span></div><div><strong id="re">0</strong><span>Errors</span></div></div>
     <div id="rbe" style="margin-bottom:4px"></div>
     <div class="save-status" id="saveStatus">💾 Saving...</div>
-    <div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap"><button class="ba" onclick="retryTest()">↺ Retry</button><button class="bo" onclick="showView('library');renderLib()">← Library</button></div>
+    <div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap"><button class="ba" onclick="retryTest()">↺ Retry</button><button class="bo" onclick="showView('library');loadLib()">← Library</button></div>
   </div>
 </div>
 <div id="v-profile" class="view">
@@ -195,11 +195,11 @@ button:disabled{opacity:.38;cursor:not-allowed;transform:none!important}
 <div id="v-race" class="view">
   <div class="topbar" style="max-width:720px"><h1 id="rvt">🏎️ Race</h1><button class="bo bs" onclick="leaveRace()">✕ Leave</button></div>
   <div id="rl" style="width:100%;max-width:500px"><div class="card" id="rl-card" style="text-align:center"><h2 style="margin-bottom:4px">Waiting for race to start...</h2><div style="display:flex;align-items:center;justify-content:center;gap:10px"><div class="lc" id="lcd">------</div><button class="bo bs" onclick="copyRaceCode()" title="Copy code" style="font-size:1.1rem;padding:8px 12px">📋</button></div><p style="color:var(--sub);margin-bottom:14px">Share this code</p><div id="lplayers" style="max-width:300px;margin:0 auto 18px"></div><p style="color:var(--sub);font-size:.8rem">Admin will start shortly...</p></div></div>
-  <div id="rpod" style="display:none;width:100%;max-width:500px"><div class="card" style="text-align:center"><h2 style="margin-bottom:14px">🏁 Race Finished!</h2><div id="pod"></div><div id="ryr" style="margin:14px 0;font-size:1.05rem"></div><button class="ba" onclick="showView('library');renderLib()">← Library</button></div></div>
+  <div id="rpod" style="display:none;width:100%;max-width:500px"><div class="card" style="text-align:center"><h2 style="margin-bottom:14px">🏁 Race Finished!</h2><div id="pod"></div><div id="ryr" style="margin:14px 0;font-size:1.05rem"></div><button class="ba" onclick="showView('library');loadLib()">← Library</button></div></div>
 </div>
 <div id="v-admin" class="view" style="align-items:center;padding:14px">
   <div style="width:100%;max-width:960px">
-    <div style="display:flex;align-items:center;gap:11px;margin-bottom:14px"><h1 style="font-size:1.35rem">⚙️ Admin Panel</h1><button class="bo bs" onclick="showView('library');renderLib()">← Library</button></div>
+    <div style="display:flex;align-items:center;gap:11px;margin-bottom:14px"><h1 style="font-size:1.35rem">⚙️ Admin Panel</h1><button class="bo bs" onclick="showView('library');loadLib()">← Library</button></div>
     <div class="adm-tabs"><button class="adm-t active" onclick="aTab('tests')">Tests</button><button class="adm-t" onclick="aTab('results')">Results</button><button class="adm-t" onclick="aTab('learners')">Learners</button><button class="adm-t" onclick="aTab('leaderboard')">Leaderboard</button><button class="adm-t" onclick="aTab('races')">Races</button><button class="adm-t" onclick="aTab('teams')">Teams</button></div>
     <div class="adm-p" id="apc"></div>
   </div>
